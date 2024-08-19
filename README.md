@@ -1,3 +1,3 @@
-# New Application Project
+# RIEU
 
 A new Flutter project.
