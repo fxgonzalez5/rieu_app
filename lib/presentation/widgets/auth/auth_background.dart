@@ -28,9 +28,19 @@ class AuthBackground extends StatelessWidget {
           child: _Bubble(color: colors.primary.withAlpha(75))
         ),
         Positioned(
+          top: responsive.hp(33),
+          right: responsive.wp(7.5),
+          child: _Bubble(size: responsive.ip(1))
+        ),
+        Positioned(
           top: responsive.hp(45),
           left: responsive.wp(10),
           child: const _Bubble()
+        ),
+        Positioned(
+          top: responsive.hp(52),
+          left: responsive.wp(17.5),
+          child: _Bubble(size: responsive.ip(1))
         ),
         child
       ],
@@ -39,21 +49,22 @@ class AuthBackground extends StatelessWidget {
 }
 
 class _Bubble extends StatelessWidget {
+  final double? size;
   final Color? color;
 
   const _Bubble({
-    this.color
+    this.size,
+    this.color,
   });
 
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
     final colors = Theme.of(context).colorScheme;
-    final size = responsive.ip(2);
 
     return Container(
-      width: size,
-      height: size,
+      width: size ?? responsive.ip(2),
+      height: size ?? responsive.ip(2),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(100),
         color: color ?? colors.primary.withAlpha(25)

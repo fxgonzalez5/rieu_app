@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:rieu/presentation/widgets/widgets.dart';
 import 'package:rieu/config/theme/responsive.dart';
 
@@ -44,7 +45,7 @@ class _FormContainer extends StatelessWidget {
 
     return Expanded(
       child: Padding(
-        padding: EdgeInsets.symmetric(vertical: responsive.hp(2), horizontal: responsive.ip(5)),
+        padding: EdgeInsets.symmetric(vertical: responsive.hp(2), horizontal: responsive.wp(7.5)),
         child: Form(
             // TODO: crear la llave del formulario
             // key: ,
@@ -84,9 +85,7 @@ class _FormContainer extends StatelessWidget {
                   height: responsive.hp(6),
                   child: FilledButton(
                     child: const Text('Registrarse'),
-                    onPressed: () {
-                      // TODO: Navegar a la pantalla de registro
-                    },
+                    onPressed: () => context.push('/register'),
                   ),
                 ),
               ],
