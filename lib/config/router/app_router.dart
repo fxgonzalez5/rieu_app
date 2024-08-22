@@ -10,10 +10,29 @@ final appRouter = GoRouter(
       builder: (context, state) => const LoginScreen(),
     ),
 
-     GoRoute(
+    GoRoute(
       path: '/register',
       name: RegisterScreen.name,
       builder: (context, state) => const RegisterScreen(),
+    ),
+
+    GoRoute(
+      path: '/process-completed',
+      name: ProcessCompletedScreen.name,
+      builder: (context, state) {
+        final extra = state.extra as Map<String, String>;
+
+        return ProcessCompletedScreen(
+          title: extra['title'] ?? 'Proceso completado',
+          subtitle: extra['subtitle'],
+          nextRoute: extra['nextRoute'],
+        );
+      },
+    ),
+
+    GoRoute(
+      path: '/',
+      redirect: ( _ , __ ) => '/login',
     ),
   ]
 );

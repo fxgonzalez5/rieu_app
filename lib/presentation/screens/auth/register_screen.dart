@@ -90,7 +90,8 @@ class _FormContainer extends StatelessWidget {
                 child: FilledButton(
                   child: const Text('Registrar'),
                   onPressed: () {
-                    // TODO: Guardar los datos del formulario y navegar a la pantalla principal
+                    // TODO: Guardar los datos del formulario
+                    context.go('/process-completed', extra: {'title': '¡Te has registrado con éxito!'} );
                   },
                 ),
               ),
