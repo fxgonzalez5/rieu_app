@@ -31,11 +31,19 @@ class AppTheme {
       labelStyle: const TextStyle(color: _secondary),
       hintStyle: const TextStyle(color: Colors.grey),
       enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide.none,
+        borderSide: BorderSide(color: _secondary.withOpacity(0.5)),
         borderRadius: BorderRadius.circular(Responsive(context).ip(1))
       ),
       focusedBorder: UnderlineInputBorder(
         borderSide: BorderSide.none,
+        borderRadius: BorderRadius.circular(Responsive(context).ip(1))
+      ),
+      errorBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: _secondary.withOpacity(0.5),),
+        borderRadius: BorderRadius.circular(Responsive(context).ip(1))
+      ),
+      focusedErrorBorder: UnderlineInputBorder(
+        borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: 1.5),
         borderRadius: BorderRadius.circular(Responsive(context).ip(1))
       ),
     ),

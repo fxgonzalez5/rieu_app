@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:rieu/infrastructure/services/google_sign_in_service.dart';
-import 'package:rieu/presentation/widgets/widgets.dart';
+import 'package:provider/provider.dart';
 import 'package:rieu/config/theme/responsive.dart';
+import 'package:rieu/infrastructure/services/services.dart';
+import 'package:rieu/presentation/providers/auth/login_form_provider.dart';
+import 'package:rieu/presentation/widgets/widgets.dart';
 
 class LoginScreen extends StatelessWidget {
   static const String name = 'login_screen';
@@ -26,7 +28,10 @@ class LoginScreen extends StatelessWidget {
                     const _TextSection(),
                     SizedBox(height: responsive.hp(3)),
                     const _LoginMethods(),
-                    const _FormContainer(),
+                    ChangeNotifierProvider(
+                      create: (_) => LoginFormProvider(loginUserCallback:(email, password) {}),
+                      child: const _FormContainer()
+                    ),
                   ],
                 ),
             ),
@@ -43,55 +48,70 @@ class _FormContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
+    final loginFormProvider = context.watch<LoginFormProvider>();
 
     return Expanded(
       child: Padding(
         padding: EdgeInsets.symmetric(vertical: responsive.hp(2), horizontal: responsive.wp(7.5)),
-        child: Form(
-            // TODO: crear la llave del formulario
-            // key: ,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                const CustomTextFormField(
-                  label: 'Correo',
-                  hint: 'usuario@utpl.edu.ec'
-                ),
-                const CustomTextFormField(
-                  label: 'Contraseña',
-                  hint: '********',
-                  noVisibility: true,
-                ),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    child: const Text('Olvidaste tu contraseña?'),
-                    onPressed: () {
-                      // TODO: Navegar a la pantalla para restablecer la contraseña
-                    },
-                  ),
-                ),
-                SizedBox(
-                  width: double.infinity,
-                  height: responsive.hp(6),
-                  child: FilledButton(
-                    child: const Text('Iniciar Sesión'),
-                    onPressed: () async {
-                      // TODO: Validar la autenticación y navegar a la pantalla principal
-                    },
-                  ),
-                ),
-                SizedBox(
-                  width: double.infinity,
-                  height: responsive.hp(6),
-                  child: FilledButton(
-                    child: const Text('Registrarse'),
-                    onPressed: () => context.push('/register'),
-                  ),
-                ),
-              ],
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            CustomTextFormField(
+              keyboardType: TextInputType.emailAddress,
+              label: 'Correo',
+              hint: 'usuario@utpl.edu.ec',
+              errorMessage: loginFormProvider.isFormPosted 
+                ? loginFormProvider.email.errorMessage
+                : null,
+              onChanged: loginFormProvider.onEmailChange,
             ),
-          ),
+            CustomTextFormField(
+              keyboardType: TextInputType.visiblePassword,
+              label: 'Contraseña',
+              hint: '********',
+              noVisibility: true,
+              errorMessage: loginFormProvider.isFormPosted 
+                ? loginFormProvider.password.errorMessage
+                : null,
+              onChanged: loginFormProvider.onPasswordChange,
+              onFieldSubmitted: (_) => loginFormProvider.onFormSubmit(),
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                child: const Text('Olvidaste tu contraseña?'),
+                onPressed: () {
+                  // TODO: Navegar a la pantalla para restablecer la contraseña
+                },
+              ),
+            ),
+            SizedBox(
+              width: double.infinity,
+              height: responsive.hp(6),
+              child: FilledButton(
+                onPressed: loginFormProvider.isPosting
+                  ? null
+                  : () async {
+                    FocusScope.of(context).unfocus();
+                    loginFormProvider.onFormSubmit();
+                    final credential = await FirebaseAuthService.login(loginFormProvider.email.value, loginFormProvider.password.value);
+                    if (credential != null) {
+                      print(credential);
+                    } // TODO: Navegar a la pantalla principal
+                  },
+                child: const Text('Iniciar Sesión')
+              ),
+            ),
+            SizedBox(
+              width: double.infinity,
+              height: responsive.hp(6),
+              child: FilledButton(
+                child: const Text('Registrarse'),
+                onPressed: () => context.replace('/register')
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -114,7 +134,7 @@ class _LoginMethods extends StatelessWidget {
             borderRadius: BorderRadius.circular(responsive.ip(0.5)),
             child: Image.asset('assets/images/logo_utpl.png', width: responsive.ip(6)),
           ),
-          onTap: () {},
+          onTap: () {}, // TODO: Implementar inicio de sesión con Microsoft
         ),
         SizedBox(width: responsive.wp(10)),
         buildInkWell(

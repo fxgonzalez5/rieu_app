@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:rieu/infrastructure/services/services.dart';
+import 'package:rieu/presentation/providers/auth/register_form_provider.dart';
 import 'package:rieu/presentation/widgets/widgets.dart';
 import 'package:rieu/config/theme/responsive.dart';
 
@@ -12,7 +15,7 @@ class RegisterScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
 
-    return  Scaffold(
+    return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
           child: AuthBackground(
@@ -20,13 +23,16 @@ class RegisterScreen extends StatelessWidget {
                 children: [
                   SizedBox(height: responsive.hp(35)),
                   const _TextSection(),
-                  const _FormContainer(),
+                  ChangeNotifierProvider(
+                    create: (_) => RegisterFormProvider(registerUserCallback: (name, email, password, institution, city) {}),
+                    child: const _FormContainer()
+                  ),
                 ],
               ),
           ),
         ),
       )
-   );
+       );
   }
 }
 
@@ -36,73 +42,105 @@ class _FormContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
+    final registerFormProvider = context.watch<RegisterFormProvider>();
 
     return Padding(
       padding: EdgeInsets.symmetric(vertical: responsive.hp(3), horizontal: responsive.wp(7.5)),
-      child: Form(
-          // TODO: crear la llave del formulario
-          // key: ,
-          child: Column(
+      child: Column(
+        children: [
+          CustomTextFormField(
+            label: 'Nombre y Apellido',
+            hint: 'Ejm. Juan Pérez',
+            errorMessage: registerFormProvider.isFormPosted 
+              ? registerFormProvider.name.errorMessage
+              : null,
+            onChanged: registerFormProvider.onFullNameChange,
+          ),
+          SizedBox(height: responsive.hp(1.5)),
+          CustomTextFormField(
+            keyboardType: TextInputType.emailAddress,
+            label: 'Correo',
+            hint: 'Ejm. usuario@example.com',
+            errorMessage: registerFormProvider.isFormPosted 
+              ? registerFormProvider.email.errorMessage
+              : null,
+            onChanged: registerFormProvider.onEmailChange,
+          ),
+          SizedBox(height: responsive.hp(1.5)),
+          Row(
             children: [
-              const CustomTextFormField(
-                label: 'Nombre y Apellido',
-                hint: 'Ejm. Juan Pérez'
-              ),
-              SizedBox(height: responsive.hp(1.5)),
-              const CustomTextFormField(
-                label: 'Correo',
-                hint: 'Ejm. usuario@example.com'
-              ),
-              SizedBox(height: responsive.hp(1.5)),
-              Row(
-                children: [
-                  const Expanded(
-                    child: CustomTextFormField(
-                      label: 'Contraseña',
-                      hint: '********',
-                      noVisibility: true,
-                    ),
-                  ),
-                  SizedBox(width: responsive.wp(2)),
-                  const Expanded(
-                    child: CustomTextFormField(
-                      label: 'Confirmar Contraseña',
-                      hint: '********',
-                      noVisibility: true,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: responsive.hp(1.5)),
-              const CustomTextFormField(
-                label: 'Institución Educativa',
-                hint: 'Ejm. Universidad Técnica Particular de Loja'
-              ),
-              SizedBox(height: responsive.hp(1.5)),
-              const CustomTextFormField(
-                label: 'Ciudad',
-                hint: 'Ejm. Loja'
-              ),
-              SizedBox(height: responsive.hp(1.5)),
-              SizedBox(
-                width: double.infinity,
-                height: responsive.hp(6),
-                child: FilledButton(
-                  child: const Text('Registrar'),
-                  onPressed: () {
-                    // TODO: Guardar los datos del formulario
-                    context.go('/process-completed', extra: {'title': '¡Te has registrado con éxito!'} );
-                  },
+              Expanded(
+                child: CustomTextFormField(
+                  keyboardType: TextInputType.visiblePassword,
+                  label: 'Contraseña',
+                  hint: '********',
+                  noVisibility: true,
+                  errorMessage: registerFormProvider.isFormPosted 
+                    ? registerFormProvider.password.errorMessage
+                    : null,
+                  onChanged: registerFormProvider.onPasswordChange,
                 ),
               ),
-              SizedBox(height: responsive.hp(3)),
-              TextButton(
-                child: const Text('Atrás', style: TextStyle(color: Colors.black)),
-                onPressed: () => context.pop(),
+              SizedBox(width: responsive.wp(2)),
+              Expanded(
+                child: CustomTextFormField(
+                  keyboardType: TextInputType.visiblePassword,
+                  label: 'Confirmar Contraseña',
+                  hint: '********',
+                  noVisibility: true,
+                  errorMessage: registerFormProvider.isFormPosted 
+                    ? registerFormProvider.confirmPassword.errorMessage
+                    : null,
+                  onChanged: registerFormProvider.onConfirmPasswordChange,
+                ),
               ),
             ],
           ),
-        ),
+          SizedBox(height: responsive.hp(1.5)),
+          CustomTextFormField(
+            label: 'Institución Educativa',
+            hint: 'Ejm. Universidad Técnica Particular de Loja',
+            errorMessage: registerFormProvider.isFormPosted 
+              ? registerFormProvider.institution.errorMessage
+              : null,
+            onChanged: registerFormProvider.onInstitutionChange,
+          ),
+          SizedBox(height: responsive.hp(1.5)),
+          CustomTextFormField(
+            label: 'Ciudad',
+            hint: 'Ejm. Loja',
+            errorMessage: registerFormProvider.isFormPosted 
+              ? registerFormProvider.city.errorMessage
+              : null,
+            onChanged: registerFormProvider.onCityChange,
+            onFieldSubmitted: (_) => registerFormProvider.onFormSubmit(),
+          ),
+          SizedBox(height: responsive.hp(1.5)),
+          SizedBox(
+            width: double.infinity,
+            height: responsive.hp(6),
+            child: FilledButton(
+              onPressed: registerFormProvider.isPosting
+                ? null
+                : () async {
+                  FocusScope.of(context).unfocus();
+                  registerFormProvider.onFormSubmit();
+                  FirebaseAuthService.register(registerFormProvider.email.value, registerFormProvider.password.value).then(
+                    (credential) {
+                      if (credential != null) context.go('/process-completed', extra: {'title': '¡Te has registrado con éxito!'});
+                    }
+                  );
+                },
+              child: const Text('Registrar'),
+            ),
+          ),
+          SizedBox(height: responsive.hp(3)),
+          TextButton(
+            child: const Text('Atrás', style: TextStyle(color: Colors.black)),
+            onPressed: () => context.replace('/login'),
+          ),
+        ],
+      ),
     );
   }
 }
