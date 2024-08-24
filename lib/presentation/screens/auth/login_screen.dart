@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:rieu/infrastructure/services/google_sign_in_service.dart';
 import 'package:rieu/presentation/widgets/widgets.dart';
 import 'package:rieu/config/theme/responsive.dart';
 
@@ -75,7 +76,7 @@ class _FormContainer extends StatelessWidget {
                   height: responsive.hp(6),
                   child: FilledButton(
                     child: const Text('Iniciar Sesión'),
-                    onPressed: () {
+                    onPressed: () async {
                       // TODO: Validar la autenticación y navegar a la pantalla principal
                     },
                   ),
@@ -119,7 +120,10 @@ class _LoginMethods extends StatelessWidget {
         buildInkWell(
           responsive: responsive,
           child: Image.asset('assets/images/logo_google.png', width: responsive.ip(6)),
-          onTap: () {},
+          onTap: () async {
+            final credential = await GoogleSingInService.signInWithGoogle();
+            if (credential != null) {} // TODO: Navegar a la pantalla principal
+          },
         )
       ]
     );
