@@ -21,6 +21,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
     HomeView(),
     CoursesView(),
     ProfileView(),
+    InformationView()
   ];
 
   @override

@@ -1,3 +1,4 @@
+export 'package:rieu/presentation/widgets/organization/info_tile.dart';
 export 'package:rieu/presentation/widgets/shared/rounded_line.dart';
 export 'package:rieu/presentation/widgets/shared/custom_bottom_navigation_bar.dart';
 export 'package:rieu/presentation/widgets/courses/course_list_item.dart';
