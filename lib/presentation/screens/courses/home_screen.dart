@@ -5,7 +5,6 @@ import 'package:rieu/presentation/providers/providers.dart';
 import 'package:rieu/presentation/views/views.dart';
 import 'package:rieu/presentation/widgets/widgets.dart';
 
-
 class HomeScreen extends StatefulWidget {
   static const String name = 'home_screen';
   final int pageIndex;
@@ -20,7 +19,8 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
   late PageController pageController;
   final viewRoutes = const [
     HomeView(),
-    CoursesView()
+    CoursesView(),
+    ProfileView(),
   ];
 
   @override
