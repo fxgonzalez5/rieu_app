@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:rieu/config/theme/responsive.dart';
+import 'package:rieu/presentation/providers/providers.dart';
 import 'package:rieu/presentation/views/views.dart';
 import 'package:rieu/presentation/widgets/widgets.dart';
 
@@ -86,6 +88,7 @@ class _Head extends StatelessWidget {
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
     final colors = Theme.of(context).colorScheme;
+    final coursesProvider = context.watch<CoursesProvider>();
 
     return Stack(
       children: [
@@ -109,9 +112,10 @@ class _Head extends StatelessWidget {
               SizedBox(
                 height: responsive.hp(3.5),
               ),
-              const CategoryFilter(
-                categories: ['Formación', 'Todo', 'Innovación'],
-                selectedCategory: 1,
+              CategoryFilter(
+                categories: coursesProvider.categories,
+                currentCategory: coursesProvider.categories.indexOf(coursesProvider.currentCategory),
+                onTap: (value) => coursesProvider.currentCategory = value,
               ),
             ],
           ),

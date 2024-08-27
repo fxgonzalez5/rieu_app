@@ -3,26 +3,28 @@ import 'package:rieu/config/theme/responsive.dart';
 
 class CategoryFilter extends StatelessWidget {
   final List<String> categories;
-  final int selectedCategory;
+  final int currentCategory;
+  final ValueChanged<String>? onTap;
 
   const CategoryFilter({
     super.key,
     required this.categories,
-    required this.selectedCategory,
+    this.currentCategory = 0,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) { 
     return Expanded(
       child: ListView.builder(
-        itemCount: 3,
+        itemCount: categories.length,
         scrollDirection: Axis.horizontal,
         itemBuilder: (context, index) => Align(
           alignment: Alignment.topCenter,
           child: CategoryButton(
-            id: index,
-            active: index == selectedCategory,
+            active: index == currentCategory,
             title: categories[index],
+            onPressed: onTap,
           ),
         ),
       ),
@@ -31,15 +33,15 @@ class CategoryFilter extends StatelessWidget {
 }
 
 class CategoryButton extends StatelessWidget {
-  final int id;
   final bool active;
   final String title;
+  final ValueChanged<String>? onPressed;
 
   const CategoryButton({
     super.key,
-    required this.id,
     required this.active,
     required this.title,
+    required this.onPressed,
   });
 
   @override
@@ -51,9 +53,7 @@ class CategoryButton extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: responsive.wp(3)),
       child: FilledButton(
         style: buildButtonStyle(colors, responsive, active: active),
-        onPressed: !active 
-          ? null
-          : () {},
+        onPressed: () => onPressed?.call(title),
         child: Text(title),
       ),
     );
@@ -63,8 +63,10 @@ class CategoryButton extends StatelessWidget {
     return ButtonStyle(
       backgroundColor: active 
         ? WidgetStatePropertyAll(colors.secondary)
-        : const WidgetStatePropertyAll(Color(0xFFF8F2F2)),
-      foregroundColor: active ? const WidgetStatePropertyAll(Colors.black) : null,
+        : WidgetStatePropertyAll(Colors.grey.shade100),
+      foregroundColor: active 
+        ? const WidgetStatePropertyAll(Colors.black) 
+        : const WidgetStatePropertyAll(Colors.grey),
       padding: WidgetStatePropertyAll(
         EdgeInsets.symmetric(
           vertical: responsive.hp(2),

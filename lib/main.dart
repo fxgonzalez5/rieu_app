@@ -27,7 +27,7 @@ void main() async {
       child: const MainApp()
     )
   );
-  
+
 }
 
 class MainApp extends StatelessWidget {
@@ -35,11 +35,16 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      debugShowCheckedModeBanner: false,
-      title: 'RIEU',
-      routerConfig: context.read<GoRouter>(),
-      theme: AppTheme().getTheme(context),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => CoursesProvider()),
+      ],
+      child: MaterialApp.router(
+        debugShowCheckedModeBanner: false,
+        title: 'RIEU',
+        routerConfig: context.read<GoRouter>(),
+        theme: AppTheme().getTheme(context),
+      ),
     );
   }
 }
