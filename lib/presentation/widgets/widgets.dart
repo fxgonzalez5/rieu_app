@@ -1,3 +1,10 @@
+export 'package:rieu/presentation/widgets/shared/custom_bottom_navigation_bar.dart';
+export 'package:rieu/presentation/widgets/courses/course_card.dart';
+export 'package:rieu/presentation/widgets/shared/category_filter.dart';
+export 'package:rieu/presentation/widgets/shared/custom_search_box.dart';
+export 'package:rieu/presentation/widgets/shared/user_information.dart';
+export 'package:rieu/presentation/widgets/shared/custom_figure.dart';
+export 'package:rieu/presentation/widgets/shared/background_images.dart';
 export 'package:rieu/presentation/widgets/shared/bubble.dart';
 export 'package:rieu/presentation/widgets/auth/custom_text_form_field.dart';
 export 'package:rieu/presentation/widgets/auth/auth_background.dart';

@@ -45,9 +45,12 @@ class AppRouter {
       ),
 
       GoRoute(
-        path: '/home',
+        path: '/home/:page',
         name: HomeScreen.name,
-        builder: (context, state) => const HomeScreen(),
+        builder: (context, state) {
+          final pageIndex = int.parse( state.pathParameters['page'] ?? '0' );
+          return HomeScreen(pageIndex: pageIndex);
+        },
       ),
     ],
 
@@ -63,7 +66,7 @@ class AppRouter {
       }
 
       if (authStatus == AuthStatus.authenticated) {
-        if (isGoingTo == '/' || isGoingTo == '/login') return '/home';
+        if (isGoingTo == '/' || isGoingTo == '/login') return '/home/0';
         return null;
       }
 

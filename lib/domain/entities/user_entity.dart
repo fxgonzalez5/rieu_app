@@ -18,4 +18,9 @@ class UserEntity {
   });
 
   bool get isAdmin => roles.contains('admin');
+
+  String get getRole {
+    if (roles.contains('admin')) return 'Administrador';
+    return 'Usuario';
+  }
 }
