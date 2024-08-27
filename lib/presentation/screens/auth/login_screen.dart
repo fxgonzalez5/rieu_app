@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:rieu/config/helpers/helpers.dart';
 import 'package:rieu/config/theme/responsive.dart';
 import 'package:rieu/infrastructure/services/services.dart';
-import 'package:rieu/presentation/providers/auth/login_form_provider.dart';
+import 'package:rieu/presentation/providers/providers.dart';
 import 'package:rieu/presentation/widgets/widgets.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -13,31 +14,37 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statusBarHeight = MediaQuery.of(context).padding.top;
     final responsive = Responsive(context);
 
     return  Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: AuthBackground(
-            child: SizedBox(
-              height: responsive.hp(100) - statusBarHeight,
-              child: Column(
-                  children: [
-                    SizedBox(height: responsive.hp(35)),
-                    const _TextSection(),
-                    SizedBox(height: responsive.hp(3)),
-                    const _LoginMethods(),
-                    ChangeNotifierProvider(
-                      create: (_) => LoginFormProvider(loginUserCallback:(email, password) {}),
-                      child: const _FormContainer()
-                    ),
-                  ],
-                ),
+      body: Consumer<AuthProvider>(
+        builder: (context, authProvider, _) {
+          if (authProvider.state.errorMessage.isNotEmpty) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              showSnackBar(context, authProvider.state.errorMessage);
+            });
+          }
+
+          return SafeArea(
+            child: SingleChildScrollView(
+              child: AuthBackground(
+                child: Column(
+                    children: [
+                      SizedBox(height: responsive.hp(35)),
+                      const _TextSection(),
+                      SizedBox(height: responsive.hp(3)),
+                      const _LoginMethods(),
+                      ChangeNotifierProvider(
+                        create: (_) => LoginFormProvider(loginUserCallback: authProvider.loginUser),
+                        child: const _FormContainer()
+                      ),
+                    ],
+                  ),
+              ),
             ),
-          ),
-        ),
-      )
+          );
+        },
+      ),
    );
   }
 }
@@ -50,68 +57,66 @@ class _FormContainer extends StatelessWidget {
     final responsive = Responsive(context);
     final loginFormProvider = context.watch<LoginFormProvider>();
 
-    return Expanded(
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: responsive.hp(2), horizontal: responsive.wp(7.5)),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            CustomTextFormField(
-              keyboardType: TextInputType.emailAddress,
-              label: 'Correo',
-              hint: 'usuario@utpl.edu.ec',
-              errorMessage: loginFormProvider.isFormPosted 
-                ? loginFormProvider.email.errorMessage
-                : null,
-              onChanged: loginFormProvider.onEmailChange,
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: responsive.hp(2), horizontal: responsive.wp(7.5)),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          CustomTextFormField(
+            keyboardType: TextInputType.emailAddress,
+            label: 'Correo',
+            hint: 'usuario@utpl.edu.ec',
+            errorMessage: loginFormProvider.isFormPosted 
+              ? loginFormProvider.email.errorMessage
+              : null,
+            onChanged: loginFormProvider.onEmailChange,
+          ),
+          SizedBox(height: responsive.hp(1.5)),
+          CustomTextFormField(
+            keyboardType: TextInputType.visiblePassword,
+            label: 'Contraseña',
+            hint: '********',
+            noVisibility: true,
+            errorMessage: loginFormProvider.isFormPosted 
+              ? loginFormProvider.password.errorMessage
+              : null,
+            onChanged: loginFormProvider.onPasswordChange,
+            onFieldSubmitted: (_) => loginFormProvider.onFormSubmit(),
+          ),
+          SizedBox(height: responsive.hp(1.5)),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              child: const Text('Olvidaste tu contraseña?'),
+              onPressed: () {
+                // TODO: Navegar a la pantalla para restablecer la contraseña
+              },
             ),
-            CustomTextFormField(
-              keyboardType: TextInputType.visiblePassword,
-              label: 'Contraseña',
-              hint: '********',
-              noVisibility: true,
-              errorMessage: loginFormProvider.isFormPosted 
-                ? loginFormProvider.password.errorMessage
-                : null,
-              onChanged: loginFormProvider.onPasswordChange,
-              onFieldSubmitted: (_) => loginFormProvider.onFormSubmit(),
-            ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                child: const Text('Olvidaste tu contraseña?'),
-                onPressed: () {
-                  // TODO: Navegar a la pantalla para restablecer la contraseña
+          ),
+          SizedBox(height: responsive.hp(1.5)),
+          SizedBox(
+            width: double.infinity,
+            height: responsive.hp(6),
+            child: FilledButton(
+              onPressed: loginFormProvider.isPosting
+                ? null
+                : () {
+                  FocusScope.of(context).unfocus();
+                  loginFormProvider.onFormSubmit();
                 },
-              ),
+              child: const Text('Iniciar Sesión')
             ),
-            SizedBox(
-              width: double.infinity,
-              height: responsive.hp(6),
-              child: FilledButton(
-                onPressed: loginFormProvider.isPosting
-                  ? null
-                  : () async {
-                    FocusScope.of(context).unfocus();
-                    loginFormProvider.onFormSubmit();
-                    final credential = await FirebaseAuthService.login(loginFormProvider.email.value, loginFormProvider.password.value);
-                    if (credential != null) {
-                      print(credential);
-                    } // TODO: Navegar a la pantalla principal
-                  },
-                child: const Text('Iniciar Sesión')
-              ),
+          ),
+          SizedBox(height: responsive.hp(1.5)),
+          SizedBox(
+            width: double.infinity,
+            height: responsive.hp(6),
+            child: FilledButton(
+              child: const Text('Registrarse'),
+              onPressed: () => context.replace('/register')
             ),
-            SizedBox(
-              width: double.infinity,
-              height: responsive.hp(6),
-              child: FilledButton(
-                child: const Text('Registrarse'),
-                onPressed: () => context.replace('/register')
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -124,6 +129,7 @@ class _LoginMethods extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
+    final authProvider = context.read<AuthProvider>();
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -140,10 +146,7 @@ class _LoginMethods extends StatelessWidget {
         buildInkWell(
           responsive: responsive,
           child: Image.asset('assets/images/logo_google.png', width: responsive.ip(6)),
-          onTap: () async {
-            final credential = await GoogleSingInService.signInWithGoogle();
-            if (credential != null) {} // TODO: Navegar a la pantalla principal
-          },
+          onTap: () => authProvider.signInUser(GoogleSingInService()),
         )
       ]
     );

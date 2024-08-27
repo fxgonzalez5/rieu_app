@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:rieu/infrastructure/services/services.dart';
-import 'package:rieu/presentation/providers/auth/register_form_provider.dart';
-import 'package:rieu/presentation/widgets/widgets.dart';
+import 'package:rieu/config/helpers/helpers.dart';
 import 'package:rieu/config/theme/responsive.dart';
+import 'package:rieu/presentation/providers/providers.dart';
+import 'package:rieu/presentation/widgets/widgets.dart';
 
 class RegisterScreen extends StatelessWidget {
   static const String name = 'register_screen';
@@ -16,23 +16,45 @@ class RegisterScreen extends StatelessWidget {
     final responsive = Responsive(context);
 
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: AuthBackground(
-            child: Column(
-                children: [
-                  SizedBox(height: responsive.hp(35)),
-                  const _TextSection(),
-                  ChangeNotifierProvider(
-                    create: (_) => RegisterFormProvider(registerUserCallback: (name, email, password, institution, city) {}),
-                    child: const _FormContainer()
+      body: Consumer<AuthProvider>(
+        builder: (context, authProvider, _) {
+          if (authProvider.state.errorMessage.isNotEmpty) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              showSnackBar(context, authProvider.state.errorMessage);
+            });
+          }
+
+          if (authProvider.state.alert != null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              final alert =  authProvider.state.alert!;
+              showAlert(context, alert.title, alert.message,
+                onContinue: () {
+                  Navigator.of(context).pop();
+                  context.go('/process-completed', extra: {'title': '¡Te has registrado con éxito!', 'nextRoute': '/home'});
+                }
+              );
+            });
+          }
+
+          return SafeArea(
+            child: SingleChildScrollView(
+              child: AuthBackground(
+                child: Column(
+                    children: [
+                      SizedBox(height: responsive.hp(35)),
+                      const _TextSection(),
+                      ChangeNotifierProvider(
+                        create: (_) => RegisterFormProvider(registerUserCallback: authProvider.registerUser),
+                        child: const _FormContainer()
+                      ),
+                    ],
                   ),
-                ],
               ),
-          ),
-        ),
+            ),
+          );
+        },
       )
-       );
+    );
   }
 }
 
@@ -49,6 +71,7 @@ class _FormContainer extends StatelessWidget {
       child: Column(
         children: [
           CustomTextFormField(
+            textCapitalization: TextCapitalization.words,
             label: 'Nombre y Apellido',
             hint: 'Ejm. Juan Pérez',
             errorMessage: registerFormProvider.isFormPosted 
@@ -98,6 +121,7 @@ class _FormContainer extends StatelessWidget {
           ),
           SizedBox(height: responsive.hp(1.5)),
           CustomTextFormField(
+            textCapitalization: TextCapitalization.words,
             label: 'Institución Educativa',
             hint: 'Ejm. Universidad Técnica Particular de Loja',
             errorMessage: registerFormProvider.isFormPosted 
@@ -107,6 +131,7 @@ class _FormContainer extends StatelessWidget {
           ),
           SizedBox(height: responsive.hp(1.5)),
           CustomTextFormField(
+            textCapitalization: TextCapitalization.words,
             label: 'Ciudad',
             hint: 'Ejm. Loja',
             errorMessage: registerFormProvider.isFormPosted 
@@ -122,14 +147,9 @@ class _FormContainer extends StatelessWidget {
             child: FilledButton(
               onPressed: registerFormProvider.isPosting
                 ? null
-                : () async {
+                : () {
                   FocusScope.of(context).unfocus();
                   registerFormProvider.onFormSubmit();
-                  FirebaseAuthService.register(registerFormProvider.email.value, registerFormProvider.password.value).then(
-                    (credential) {
-                      if (credential != null) context.go('/process-completed', extra: {'title': '¡Te has registrado con éxito!'});
-                    }
-                  );
                 },
               child: const Text('Registrar'),
             ),

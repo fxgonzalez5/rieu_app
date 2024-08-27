@@ -30,6 +30,7 @@ class AppTheme {
       fillColor: Colors.grey.shade100,
       labelStyle: const TextStyle(color: _secondary),
       hintStyle: const TextStyle(color: Colors.grey),
+      errorMaxLines: 5,
       enabledBorder: OutlineInputBorder(
         borderSide: BorderSide(color: _secondary.withOpacity(0.5)),
         borderRadius: BorderRadius.circular(Responsive(context).ip(1))

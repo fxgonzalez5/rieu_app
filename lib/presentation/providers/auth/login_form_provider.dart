@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:formz/formz.dart';
 import 'package:rieu/infrastructure/inputs/inputs.dart';
 
@@ -31,7 +31,6 @@ class LoginFormProvider extends ChangeNotifier {
     isPosting = true;
     notifyListeners();
     
-    Future.delayed(const Duration(milliseconds: 1000));
     await loginUserCallback(email.value, password.value);
     
     isPosting = false;

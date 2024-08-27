@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:formz/formz.dart';
 import 'package:rieu/infrastructure/inputs/inputs.dart';
 
@@ -59,7 +59,7 @@ class RegisterFormProvider extends ChangeNotifier {
     isPosting = true;
     notifyListeners();
     
-    await registerUserCallback(name.value, email.value, password.value, password.value, password.value);
+    await registerUserCallback(name.value, email.value, password.value, institution.value, city.value);
     
     isPosting = false;
     notifyListeners();

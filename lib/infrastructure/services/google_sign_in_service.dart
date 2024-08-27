@@ -1,12 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:rieu/domain/entities/entities.dart';
+import 'package:rieu/infrastructure/services/auth_service.dart';
 
-class GoogleSingInService {
+class GoogleSingInService implements AuthService {
   static final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: ['email'],
   );
 
-  static Future<UserCredential?> signInWithGoogle() async {
+  @override
+  Future<UserEntity> signInService() async {
     try {
       final GoogleSignInAccount? account = await _googleSignIn.signIn();
       final GoogleSignInAuthentication? googleAuth = await account?.authentication;
@@ -15,12 +18,24 @@ class GoogleSingInService {
         accessToken: googleAuth?.accessToken,
         idToken: googleAuth?.idToken,
       );
-      print('Credential: $credential');
 
-      return await FirebaseAuth.instance.signInWithCredential(credential);
+      final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      final user = userCredential.user;
+      if (account == null || user == null) throw Exception('No se pudo iniciar sesión con Google, intente nuevamente');
+      
+      final userEntity = UserEntity(
+        id: user.uid,
+        photoUrl: account.photoUrl,
+        name: account.displayName ?? 'Usuario Anónimo',
+        email: account.email,
+      );
+      
+      return userEntity;
     } catch (e) {
-      print('Error signing in with Google: $e');
-      return null;
+      throw Exception('Error al iniciar sesión con Google');
     }
   }
+
+  @override
+  Future<void> signOutService() async => await _googleSignIn.signOut();
 }
