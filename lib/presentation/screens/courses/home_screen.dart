@@ -20,6 +20,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
   late PageController pageController;
   final viewRoutes = const [
     HomeView(),
+    CoursesView()
   ];
 
   @override

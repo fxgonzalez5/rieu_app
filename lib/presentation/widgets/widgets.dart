@@ -1,4 +1,5 @@
 export 'package:rieu/presentation/widgets/shared/custom_bottom_navigation_bar.dart';
+export 'package:rieu/presentation/widgets/courses/course_list_item.dart';
 export 'package:rieu/presentation/widgets/courses/course_card.dart';
 export 'package:rieu/presentation/widgets/shared/category_filter.dart';
 export 'package:rieu/presentation/widgets/shared/custom_search_box.dart';
