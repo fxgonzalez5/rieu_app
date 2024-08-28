@@ -38,14 +38,14 @@ class InfoTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(title, style: texts.titleSmall,),
+                Text(title, style: texts.titleSmall),
                 SizedBox(height: responsive.hp(1),),
-                Text(subTitle, style: texts.bodyLarge!.copyWith(color: Colors.grey), maxLines: 2,),
+                Text('"$subTitle"', style: texts.bodyLarge!.copyWith(color: Colors.grey), maxLines: 2,),
                 SizedBox(height: responsive.hp(2),),
                 TextButton(
                   onPressed: link != null
                     ? () => openUrl(link!)
-                    : null,
+                    : () => showSnackBar(context, 'No tiene sitio web registrado'),
                   child: Text(linkText, style: const TextStyle(decoration: TextDecoration.underline)),
                 )
               ],

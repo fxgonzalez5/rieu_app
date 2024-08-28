@@ -6,7 +6,8 @@ import 'package:provider/provider.dart';
 import 'package:rieu/config/firebase/firebase_options.dart';
 import 'package:rieu/config/router/router.dart';
 import 'package:rieu/config/theme/app_theme.dart';
-import 'package:rieu/infrastructure/repositories/auth_repository_impl.dart';
+import 'package:rieu/infrastructure/datasources/datasources.dart';
+import 'package:rieu/infrastructure/repositories/repositories.dart';
 import 'package:rieu/presentation/providers/providers.dart';
 
 void main() async {
@@ -38,6 +39,12 @@ class MainApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => CoursesProvider()),
+        ChangeNotifierProvider(
+          create: (_) => OrganizationsProvider(
+            organizationsRepository:  OrganizationsProfilesRepositoryImpl(LocalOrganizationsDatasource(jsonPath: 'assets/data/information.json'))
+          ),
+          lazy: false,
+        ),
       ],
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,

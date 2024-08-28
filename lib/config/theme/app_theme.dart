@@ -20,6 +20,18 @@ class AppTheme {
     ),
 
     textTheme: TextTheme(
+      titleLarge: TextStyle(
+        fontSize: Responsive(context).ip(2),
+        fontWeight: FontWeight.w600
+      ),
+      titleMedium: TextStyle(
+        fontSize: Responsive(context).ip(1.8),
+        fontWeight: FontWeight.normal
+      ),
+      titleSmall: TextStyle(
+        fontSize: Responsive(context).ip(1.6),
+        fontWeight: FontWeight.normal
+      ),
       bodyLarge: TextStyle(
         fontSize: Responsive(context).ip(1.4),
       ),

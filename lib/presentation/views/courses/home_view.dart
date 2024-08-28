@@ -17,7 +17,7 @@ class HomeView extends StatelessWidget {
           Align(
             heightFactor: responsive.hp(0.2),
             alignment: Alignment.centerLeft,
-            child: Text('Destacados', style: texts.titleLarge!.copyWith(fontWeight: FontWeight.bold)),
+            child: Text('Destacados', style: texts.titleLarge),
           ),
           Expanded(
             child: ListView.builder(

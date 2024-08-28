@@ -176,6 +176,7 @@ class _Heading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
+    
     final texts = Theme.of(context).textTheme;
     final user = context.read<AuthProvider>().state.user!;
     

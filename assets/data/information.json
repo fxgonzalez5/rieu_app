@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Proyecto Ascendere",
+    "slogan": "Recuerda Superarte Siempre",
+    "imagePath": "assets/images/logo_proyecto_ascendere.png",
+    "website": "https://ascendere.utpl.edu.ec/"
+  },
+  {
+    "name": "SG Ascendere",
+    "slogan": "Recuerda Superarte Siempre",
+    "imagePath": "assets/images/logo_sg_ascendere.png",
+    "website": "https://sg-ascendere.liidutpl.ec/home"
+  },
+  {
+    "name": "LIID",
+    "slogan": "Recuerda Superarte Siempre",
+    "imagePath": "assets/images/logo_liid.png",
+    "website": "https://ascendere.utpl.edu.ec/"
+  },
+  {
+    "name": "Encuentros",
+    "slogan": "Recuerda Superarte Siempre",
+    "imagePath": "assets/images/logo_cafe_cientifico.png",
+    "website": null
+  }
+]

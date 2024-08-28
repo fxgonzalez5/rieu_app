@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:rieu/config/theme/responsive.dart';
+import 'package:rieu/presentation/providers/providers.dart';
 import 'package:rieu/presentation/widgets/widgets.dart';
-
 
 class InformationView extends StatelessWidget {
   const InformationView({super.key});
@@ -9,6 +10,7 @@ class InformationView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
+    final organizationsProfiles = context.read<OrganizationsProvider>().organizationsProfiles;
 
     return SafeArea(
       child: Padding(
@@ -21,14 +23,16 @@ class InformationView extends StatelessWidget {
                 height: responsive.hp(75),
                 child: ListView.separated(
                   padding: EdgeInsets.only(top: responsive.hp(3)),
-                  itemCount: 5,
+                  itemCount: organizationsProfiles.length,
                   separatorBuilder: (_, __) => const Divider(),
-                  itemBuilder: (BuildContext _, int index) {
-                    return const InfoTile(
-                      image: 'assets/images/logo_proyecto_ascendere.png',
-                      title: 'Proyecto Ascendere',
-                      subTitle: '"Recuerda Superarte Siempre"',
-                      link: 'https://flutter.dev',
+                  itemBuilder: (context, index) {
+                    final organizationProfile = organizationsProfiles[index];
+
+                    return InfoTile(
+                      image: organizationProfile.imagePath,
+                      title: organizationProfile.name,
+                      subTitle: organizationProfile.slogan,
+                      link: organizationProfile.website,
                     );
                   },
                 ),
