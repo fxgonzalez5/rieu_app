@@ -12,7 +12,7 @@ class BackgroundImages extends StatelessWidget {
       children: [
         SizedBox(
           width: double.infinity,
-          height: responsive.hp(22),
+          height: responsive.hp(25),
         ),
         Expanded(
           child: Image.asset(

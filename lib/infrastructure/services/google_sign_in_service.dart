@@ -8,6 +8,13 @@ class GoogleSingInService implements AuthService {
     scopes: ['email'],
   );
 
+  String? getHighQualityPhotoUrl(String? photoUrl) {
+    if (photoUrl == null) return null;
+    final baseUrl = photoUrl.split('=')[0];
+    // Solicitar una imagen de mayor tamaño
+    return '$baseUrl=s1024-c';
+  }
+
   @override
   Future<UserEntity> signInService() async {
     try {
@@ -25,7 +32,7 @@ class GoogleSingInService implements AuthService {
       
       final userEntity = UserEntity(
         id: user.uid,
-        photoUrl: account.photoUrl,
+        photoUrl: getHighQualityPhotoUrl(account.photoUrl),
         name: account.displayName ?? 'Usuario Anónimo',
         email: account.email,
       );

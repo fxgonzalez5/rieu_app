@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rieu/config/theme/responsive.dart';
 
 class CheckAuthScreen extends StatelessWidget {
   static const String name = 'check_auth_screen';
@@ -7,9 +8,14 @@ class CheckAuthScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    final responsive = Responsive(context);
+
+    return Scaffold(
       body: Center(
-        child: CircularProgressIndicator(strokeWidth: 2),
+        child: Image(
+          image: const AssetImage('assets/loaders/spin_loading.gif'),
+          width: responsive.wp(15),
+        ),
       ),
    );
   }

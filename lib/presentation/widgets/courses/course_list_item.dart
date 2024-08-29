@@ -31,22 +31,19 @@ class CourseListItem extends StatelessWidget {
               _CoverImage(imageUrl),
               SizedBox(width: responsive.wp(5)),
               Expanded(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: responsive.hp(1)),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: texts.bodyLarge,
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const Spacer(),
-                      _Subtitle(subtitle),
-                      _CustomProgress(progress, session)
-                    ],
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: texts.titleSmall,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const Spacer(),
+                    _Subtitle(subtitle),
+                    _CustomProgress(progress, session)
+                  ],
                 ),
               )
             ],
@@ -101,6 +98,7 @@ class _Subtitle extends StatelessWidget {
     final texts = Theme.of(context).textTheme;
 
     return RichText(
+      maxLines: 1,
       text: TextSpan(
         text: 'Instructor(a): ',
         style: texts.bodyMedium!.copyWith(color: Colors.grey.shade600, fontWeight: FontWeight.w600),
@@ -127,10 +125,17 @@ class _CoverImage extends StatelessWidget {
         borderRadius: BorderRadius.circular(responsive.ip(1))
       ),
       elevation: responsive.ip(0.75),
-      child: Image.network(
-        imageUrl,
-        width: responsive.wp(35),
-        fit: BoxFit.cover
+      child: DecoratedBox(
+        decoration: BoxDecoration(color: Colors.grey.shade100),
+        child: FadeInImage.assetNetwork(
+          width: responsive.wp(35),
+          height: double.infinity,
+          placeholderScale: 3,
+          placeholderFit: BoxFit.none,
+          fit: BoxFit.cover,
+          placeholder: 'assets/loaders/light_bulb_loading.gif', 
+          image: imageUrl,
+        ),
       ),
     );
   }

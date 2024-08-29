@@ -21,11 +21,17 @@ class CourseCard extends StatelessWidget {
         color: colors.surface,
         child: Column(
           children: [
-            Image.network(
-              "https://via.placeholder.com/500/CC0000?text=Placeholder",
-              width: double.infinity,
-              height: responsive.hp(30),
-              fit: BoxFit.cover,
+            DecoratedBox(
+              decoration: BoxDecoration(color: Colors.grey.shade100),
+              child: FadeInImage.assetNetwork(
+                width: double.infinity,
+                height: responsive.hp(30),
+                placeholderScale: 1.75,
+                placeholderFit: BoxFit.none,
+                fit: BoxFit.cover,
+                placeholder: 'assets/loaders/light_bulb_loading.gif', 
+                image: 'https://via.placeholder.com/500/CC0000?text=Placeholder',
+              ),
             ),
             ListTile(
               contentPadding: EdgeInsets.symmetric(vertical: responsive.hp(0.75), horizontal: responsive.wp(5)),

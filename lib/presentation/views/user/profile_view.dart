@@ -24,6 +24,14 @@ class ProfileView extends StatelessWidget {
               width: double.infinity,
               height: responsive.hp(45),
               fit: BoxFit.cover,
+              loadingBuilder: (_, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Container(
+                  alignment: Alignment.center,
+                  height: responsive.hp(45),
+                  child: Image.asset('assets/loaders/ripple_loading.gif', height: responsive.hp(15)),
+                );
+              },
             )
           else
             Container(
@@ -176,7 +184,6 @@ class _Heading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
-    
     final texts = Theme.of(context).textTheme;
     final user = context.read<AuthProvider>().state.user!;
     

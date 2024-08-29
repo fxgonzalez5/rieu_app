@@ -20,6 +20,9 @@ class AppTheme {
     ),
 
     textTheme: TextTheme(
+      headlineLarge: TextStyle(
+        fontSize: Responsive(context).ip(3.6),
+      ),
       titleLarge: TextStyle(
         fontSize: Responsive(context).ip(2),
         fontWeight: FontWeight.w600
@@ -33,6 +36,9 @@ class AppTheme {
         fontWeight: FontWeight.normal
       ),
       bodyLarge: TextStyle(
+        fontSize: Responsive(context).ip(1.5),
+      ),
+      bodyMedium: TextStyle(
         fontSize: Responsive(context).ip(1.4),
       ),
     ),

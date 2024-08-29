@@ -28,7 +28,14 @@ class UserInformation extends StatelessWidget {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(100),
             child: user.photoUrl != null
-              ? Image.network(user.photoUrl!, fit: BoxFit.cover)
+              ? Image.network(
+                  user.photoUrl!,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (_, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Image.asset('assets/loaders/ripple_loading.gif');
+                  },
+                )
               : DecoratedBox(
                   decoration: BoxDecoration(color: Colors.grey.shade300),
                   child: Center(child: Text(TextFormats.getInitials(user.name), style: texts.headlineMedium!.copyWith(color: Colors.grey))),

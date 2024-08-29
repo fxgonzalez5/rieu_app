@@ -28,7 +28,8 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
   void initState() {
     super.initState();
     pageController = PageController(
-      keepPage: true
+      keepPage: true,
+      initialPage: widget.pageIndex,
     );
   }
 
@@ -89,40 +90,32 @@ class _Head extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
-    final colors = Theme.of(context).colorScheme;
     final coursesProvider = context.watch<CoursesProvider>();
 
-    return Stack(
-      children: [
-        CustomFigure(
-          color: colors.primary,
-          scale: 2,
-          expand: true,
-          child: Column(
-            children: [
-              Padding(
-                padding: EdgeInsets.only(top: responsive.wp(5), left: responsive.wp(5), right: responsive.wp(5)),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const UserInformation(),
-                    SizedBox(height: responsive.ip(2)),
-                    const CustomSearchBar(),
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: responsive.hp(3.5),
-              ),
-              CategoryFilter(
-                categories: coursesProvider.categories,
-                currentCategory: coursesProvider.categories.indexOf(coursesProvider.currentCategory),
-                onTap: (value) => coursesProvider.currentCategory = value,
-              ),
-            ],
+    return CustomFigure(
+      scale: 1,
+      expand: true,
+      child: Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.only(top: responsive.wp(5), left: responsive.wp(5), right: responsive.wp(5)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const UserInformation(),
+                SizedBox(height: responsive.ip(2)),
+                const CustomSearchBar(),
+              ],
+            ),
           ),
-        ),
-      ],
+          SizedBox(height: responsive.hp(3.5)),
+          CategoryFilter(
+            categories: coursesProvider.categories,
+            currentCategory: coursesProvider.categories.indexOf(coursesProvider.currentCategory),
+            onTap: (value) => coursesProvider.currentCategory = value,
+          ),
+        ],
+      ),
     );
   }
 }

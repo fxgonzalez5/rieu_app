@@ -23,7 +23,6 @@ class CustomFigure extends StatelessWidget {
     final responsive = Responsive(context);
 
     return SizedBox(
-      width: double.infinity,
       height: responsive.hp(30),
       child: LayoutBuilder(
         builder: (context, constraints) => Stack(
@@ -32,7 +31,7 @@ class CustomFigure extends StatelessWidget {
               width: constraints.maxWidth,
               height: constraints.maxHeight,
               child: CustomPaint(
-                painter: Figure(color, scale),
+                painter: Figure(color ?? Theme.of(context).colorScheme.primary, scale),
                 child: backgroundImage,   
               ),
             ),
@@ -51,7 +50,7 @@ class CustomFigure extends StatelessWidget {
 class Figure extends CustomPainter {
   // Definición del lienzo
   final _path = Path();
-  final Color? color;
+  final Color color;
   final double scale;
 
   Figure(
@@ -87,7 +86,7 @@ class Figure extends CustomPainter {
     // Configuración del lápiz/pincel
     final paint = Paint()
       ..strokeWidth = 1
-      ..color = (color == null) ? Colors.transparent : color!
+      ..color = color
       ..style = PaintingStyle.fill;
 
     // Lugar donde se va ha dibujar
