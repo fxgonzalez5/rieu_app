@@ -51,6 +51,16 @@ class AppRouter {
           final pageIndex = int.parse( state.pathParameters['page'] ?? '0' );
           return HomeScreen(pageIndex: pageIndex);
         },
+        routes: [
+          GoRoute(
+            path: 'course/:id',
+            name: CourseScreen.name,
+            builder: (context, state) {
+              final courseId = state.pathParameters['id'] ?? 'no-id';
+              return CourseScreen(courseId: courseId);
+            },
+          ),
+        ]
       ),
     ],
 

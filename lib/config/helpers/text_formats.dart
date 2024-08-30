@@ -10,4 +10,18 @@ class TextFormats {
     // Devuelve las iniciales de la primera y la última palabra en mayúsculas
     return (words.first[0] + words.last[0]).toUpperCase();
   }
+
+  static List<String> splitTextIntoLines(String text) {
+    final List<String> lines = text.split('\n');
+    final List<String> trimmedLines = [];
+
+    for (int i = 0; i < lines.length; i++) {
+      final String line = lines[i].trim();
+      if (line.isNotEmpty) {
+        trimmedLines.add(line);
+      }
+    }
+
+    return trimmedLines;
+  }
 }

@@ -23,6 +23,9 @@ class AppTheme {
       headlineLarge: TextStyle(
         fontSize: Responsive(context).ip(3.6),
       ),
+      headlineSmall: TextStyle(
+        fontSize: Responsive(context).ip(3.2),
+      ),
       titleLarge: TextStyle(
         fontSize: Responsive(context).ip(2),
         fontWeight: FontWeight.w600
@@ -41,6 +44,17 @@ class AppTheme {
       bodyMedium: TextStyle(
         fontSize: Responsive(context).ip(1.4),
       ),
+    ),
+
+    iconTheme: IconThemeData(
+      size: Responsive(context).ip(2.5),
+    ),
+
+    tabBarTheme: TabBarTheme(
+      indicatorColor: _secondary,
+      indicatorSize: TabBarIndicatorSize.tab,
+      labelColor: _secondary,
+      dividerColor: Colors.grey.shade300
     ),
 
     inputDecorationTheme: InputDecorationTheme(

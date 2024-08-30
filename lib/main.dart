@@ -39,6 +39,7 @@ class MainApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => CoursesProvider()),
+        ChangeNotifierProvider(create: (_) => CourseProvider()),
         ChangeNotifierProvider(
           create: (_) => OrganizationsProvider(
             organizationsRepository:  OrganizationsProfilesRepositoryImpl(LocalOrganizationsDatasource(jsonPath: 'assets/data/information.json'))

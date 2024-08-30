@@ -25,7 +25,7 @@ class CourseCard extends StatelessWidget {
               decoration: BoxDecoration(color: Colors.grey.shade100),
               child: FadeInImage.assetNetwork(
                 width: double.infinity,
-                height: responsive.hp(30),
+                height: responsive.hp(25),
                 placeholderScale: 1.75,
                 placeholderFit: BoxFit.none,
                 fit: BoxFit.cover,
@@ -37,7 +37,7 @@ class CourseCard extends StatelessWidget {
               contentPadding: EdgeInsets.symmetric(vertical: responsive.hp(0.75), horizontal: responsive.wp(5)),
               titleTextStyle: texts.titleMedium,
               subtitleTextStyle: texts.bodyLarge!.copyWith(color: Colors.grey.shade600),
-              title: Text('Protección jurídica de activos intelectuales'),
+              title: Text('Protección jurídica de activos intelectuales', maxLines: 2),
               subtitle: Row(
                 children: [
                   Text('Por Diana Días'),
