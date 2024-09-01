@@ -2,58 +2,34 @@ import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:rieu/config/helpers/text_formats.dart';
 import 'package:rieu/config/theme/responsive.dart';
+import 'package:rieu/domain/entities/course.dart';
 import 'package:rieu/presentation/widgets/widgets.dart';
 
 class SectionView extends StatelessWidget {
+  final Course course;
   final bool isActive;
 
-  const SectionView({super.key, required this.isActive});
+  const SectionView({
+    super.key,
+    required this.course,
+    required this.isActive
+  });
 
   @override
   Widget build(BuildContext context) {
-    final sections = [
-      {
-        'title': 'Introducción a la programación',
-        'content': '''
-          Excepteur velit elit mollit eiusmod magna deserunt ex dolor voluptate nulla.
-          Nostrud velit duis exercitation sunt anim aliqua ea exercitation nulla Lorem.
-          Id sint sint ex reprehenderit irure et nulla adipisicing reprehenderit.
-          '''
-      },
-      {
-        'title': 'Introducción a la programación',
-        'content': null
-      },
-      {
-        'title': 'Introducción a la programación',
-        'content': '''
-          Excepteur velit elit mollit eiusmod magna deserunt ex dolor voluptate nulla.
-          Nostrud velit duis exercitation sunt anim aliqua ea exercitation nulla Lorem.
-          Id sint sint ex reprehenderit irure et nulla adipisicing reprehenderit.
-          '''
-      },
-      {
-        'title': 'Introducción a la programación',
-        'content': '''
-          Excepteur velit elit mollit eiusmod magna deserunt ex dolor voluptate nulla.
-          Nostrud velit duis exercitation sunt anim aliqua ea exercitation nulla Lorem.
-          Id sint sint ex reprehenderit irure et nulla adipisicing reprehenderit.
-          '''
-      },
-    ];
     final responsive = Responsive(context);
 
-    if (sections.length == 1) {
+    if (course.sections.length == 1) {
       return Column(
         children: [
-          Expanded(child: SectionContent(section: sections[0])),
+          Expanded(child: SectionContent(section: course.sections[0])),
           if (isActive) SizedBox(height: responsive.hp(10)),
         ],
       );
     } else {
       return Column(
         children: [
-          Expanded(child: _SectionList(sections: sections)),
+          Expanded(child: _SectionList(sections: course.sections)),
           if (isActive) SizedBox(height: responsive.hp(10)),
         ],
       );
@@ -62,7 +38,7 @@ class SectionView extends StatelessWidget {
 }
 
 class _SectionList extends StatefulWidget {
-  final List<Map<String, String?>> sections;
+  final List<Section> sections;
 
   const _SectionList({
     required this.sections,
@@ -103,7 +79,7 @@ class _SectionListState extends State<_SectionList> {
       itemBuilder: (context, index) {
         final bool isLast = index + 1 == widget.sections.length;
         final bool isExpanded = controllers[index].expanded;
-        final bool hasContent = widget.sections[index]['content'] != null;
+        final bool hasContent = widget.sections[index].content != null;
     
         return ExpandableNotifier(
           controller: controllers[index],
@@ -118,7 +94,7 @@ class _SectionListState extends State<_SectionList> {
                 ),
                 collapsed: Collapsed(
                   decoration: buildDecorationCollapsed(context, isExpanded, hasContent),
-                  title: 'Unidad ${index + 1}: ${widget.sections[index]['title']}',
+                  title: 'Unidad ${index + 1}: ${widget.sections[index].title}',
                   titleStyle: isExpanded ? texts.bodyLarge!.copyWith(fontWeight: FontWeight.bold) : null,
                   onExpansionChanged: (value) => setState(() {
                     for (int i = 0; i < controllers.length; i++) {
@@ -133,7 +109,7 @@ class _SectionListState extends State<_SectionList> {
                       decoration: buildDecorationExpanded(context),
                       child: Builder(
                         builder: (_) {
-                          final List<String> listOfContents = TextFormats.splitTextIntoLines(widget.sections[index]['content']!);
+                          final List<String> listOfContents = TextFormats.splitTextIntoLines(widget.sections[index].content!);
                           return Column(
                             children: List.generate(listOfContents.length, (int index) {
                               final text = listOfContents[index];
@@ -194,7 +170,7 @@ class _SectionListState extends State<_SectionList> {
 }
 
 class SectionContent extends StatelessWidget {
-  final Map<String, String?> section;
+  final Section section;
 
   const SectionContent({
     super.key,
@@ -204,13 +180,16 @@ class SectionContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
-    final List<String> listOfContents = TextFormats.splitTextIntoLines(section['content']!);
+    final List<String> listOfContents = TextFormats.splitTextIntoLines(section.content ?? '');
 
     return ListView(
       padding: EdgeInsets.symmetric(vertical: responsive.hp(2)),
       children: [
-        Text(section['title']!, style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.bold)),
-        SizedBox(height: responsive.hp(1)),
+        if (section.title.isNotEmpty) 
+          ...[
+            Text(section.title, style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.bold)),
+            SizedBox(height: responsive.hp(1)),
+          ],
         ...List.generate(listOfContents.length, (int index) {
           final text = listOfContents[index];
           return ListItem(text: text);

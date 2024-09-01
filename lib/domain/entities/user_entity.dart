@@ -6,6 +6,7 @@ class UserEntity {
   final List<String> roles;
   final String? institution;
   final String? city;
+  final List<Map<String, dynamic>> courses;
 
   UserEntity({
     required this.id,
@@ -15,6 +16,7 @@ class UserEntity {
     this.roles = const ['user'],
     this.institution,
     this.city,
+    this.courses = const [],
   });
 
   bool get isAdmin => roles.contains('admin');

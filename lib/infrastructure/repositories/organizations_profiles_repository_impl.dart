@@ -3,7 +3,7 @@ import 'package:rieu/domain/entities/organization_profile.dart';
 import 'package:rieu/domain/repositories/organizations_profiles_repository.dart';
 
 class OrganizationsProfilesRepositoryImpl implements OrganizationsProfilesRepository {
-  final OrganizationsProfilesDatasource organizationsDatasource;
+  final OrganizationsProfilesDataSource organizationsDatasource;
 
   OrganizationsProfilesRepositoryImpl(this.organizationsDatasource);
 

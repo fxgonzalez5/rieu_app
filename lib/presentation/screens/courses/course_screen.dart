@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:rieu/config/helpers/helpers.dart';
 import 'package:rieu/config/theme/responsive.dart';
 import 'package:rieu/domain/entities/entities.dart';
 import 'package:rieu/presentation/providers/providers.dart';
@@ -16,27 +17,52 @@ class CourseScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) { 
+    final responsive = Responsive(context);
+    final courseProvider = context.watch<CourseProvider>();
+    final course = courseProvider.coursesMap[courseId];
+
+    if (courseProvider.errorMessage.isNotEmpty) {
+      return PopScope(
+        onPopInvoked: (_) => courseProvider.errorMessage = '',
+        child: Scaffold(
+          appBar: AppBar(),
+          body: Center(
+            child: Text(courseProvider.errorMessage),
+          ),
+        ),
+      );
+    }
+
+    if (course == null) {
+      return Scaffold(
+        body: Center(
+          child: Image(
+            image: const AssetImage('assets/loaders/spin_loading.gif'),
+            width: responsive.wp(15),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         actions: [
           IconButton(
             icon: const Icon(Icons.share),
-            onPressed: () {
-              
-            },
+            onPressed: () {},
           ),
         ],
       ),
-      body: const _CourseBody(),
+      body: _CourseBody(course: course),
     );
   }
 }
 
 class _CourseBody extends StatelessWidget {
-  final CourseStatus status = CourseStatus.accepted;
+  final Course course;
+  final CourseStatus status = CourseStatus.available;
   
-  const _CourseBody();
+  const _CourseBody({required this.course});
 
   @override
   Widget build(BuildContext context) {
@@ -51,20 +77,32 @@ class _CourseBody extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: responsive.wp(5)),
           child: Column(
             children: [
-              const _BannerImage(image: 'https://via.placeholder.com/500/FF5500?text=Placeholder'),
+              _BannerImage(image: course.posterPath),
               Padding(
                 padding: EdgeInsets.only(top: responsive.hp(2), bottom: responsive.hp(1)),
-                child: Text('Protección jurídica de activos intelectuales', style: texts.headlineSmall),
+                child: Text(course.name, style: texts.headlineSmall, textAlign: TextAlign.justify),
               ),
-              const _InstructorPanel(
-                image: 'https://via.placeholder.com/50',
-                name: 'Diana Días Vega',
+              Container(
+                alignment: Alignment.centerLeft,
+                height: responsive.wp(12),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  scrollDirection: Axis.horizontal,
+                  itemCount: course.instructors.length,
+                  itemBuilder: (context, index) => Padding(
+                    padding: EdgeInsets.only(right: responsive.wp(10)),
+                    child: _InstructorPanel(
+                      image: course.instructors[index].photoPath,
+                      name: course.instructors[index].name,
+                    ),
+                  ),
+                ),
               ),
-              SizedBox(height: responsive.hp(1)),
-              const _OverviewSection(),
+              _OverviewSection(course),
               Expanded(
                 child: _ContentTabs(
                   user: user,
+                  course: course,
                   status: status,
                 ),
               ),
@@ -139,10 +177,12 @@ class _FloatingBox extends StatelessWidget {
 
 class _ContentTabs extends StatefulWidget {
   final UserEntity user;
+  final Course course;
   final CourseStatus status;
   
   const _ContentTabs({
     required this.user,
+    required this.course,
     required this.status,
   });
 
@@ -169,8 +209,14 @@ class _ContentTabsState extends State<_ContentTabs> with TickerProviderStateMixi
 
   List<Widget> buildViewTabs() {
     return [
-      DescriptionView(isActive: widget.status != CourseStatus.accepted && !widget.user.isAdmin),
-      SectionView(isActive: widget.status != CourseStatus.accepted && !widget.user.isAdmin),
+      DescriptionView(
+        course: widget.course,
+        isActive: widget.status != CourseStatus.accepted && !widget.user.isAdmin
+      ),
+      SectionView(
+        course: widget.course,
+        isActive: widget.status != CourseStatus.accepted && !widget.user.isAdmin
+      ),
       RegisterView(isAdmin: widget.user.isAdmin),
       HistoryView(isAdmin: widget.user.isAdmin),
     ];
@@ -222,40 +268,36 @@ class _ContentTabsState extends State<_ContentTabs> with TickerProviderStateMixi
 }
 
 class _OverviewSection extends StatelessWidget {
-  const _OverviewSection({
-    super.key,
-  });
+  final Course course;
+
+  const _OverviewSection(this.course);
 
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
-    final texts = Theme.of(context).textTheme;
 
     return SizedBox(
       height: responsive.hp(12.5),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Row(
-            children: [
-              const Icon(Icons.apartment),
-              Text('  Salas de formación  |  Presencial', style: texts.bodyLarge),
-            ],
-          ),
-          Row(
-            children: [
-              const Icon(Icons.schedule),
-              Text('  40 horas  |  11h00 a 13h00', style: texts.bodyLarge),
-            ],
-          ),
-          Row(
-            children: [
-              const Icon(Icons.calendar_today_outlined),
-              Text('  16/07/2024  |  19/07/2024', style: texts.bodyLarge),
-            ],
-          ),
+          buildRow(context, icon: Icons.apartment, leftText: course.location, rightText: course.modality),
+          buildRow(context, icon: Icons.schedule, leftText: '${course.duration} horas', rightText: course.schedule),
+          buildRow(context, icon: Icons.calendar_today_outlined, leftText: TextFormats.date(course.startDate), rightText: TextFormats.date(course.endDate)),
         ],
       ),
+    );
+  }
+
+  Row buildRow(BuildContext context, {required IconData icon, required String leftText, required String rightText}) {
+    final responsive = Responsive(context);
+    final texts = Theme.of(context).textTheme;
+    return Row(
+      children: [
+        Icon(icon),
+        SizedBox(width: responsive.wp(2)),
+        Text('$leftText  |  $rightText', style: texts.bodyLarge),
+      ],
     );
   }
 }
@@ -276,13 +318,19 @@ class _InstructorPanel extends StatelessWidget {
     return Row(
       children: [
         CircleAvatar(
-          radius: responsive.wp(6.5),
+          radius: responsive.wp(5),
           backgroundColor: Colors.grey.shade100,
-          foregroundImage: NetworkImage(image),
-          child: Image.asset('assets/loaders/ripple_loading.gif'),
+          child: Image.network(
+            image,
+            loadingBuilder: (_, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return Image.asset('assets/loaders/ripple_loading.gif');
+            },
+          ),
         ),
         SizedBox(width: responsive.wp(2)),
         Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(name, style: texts.bodyLarge),

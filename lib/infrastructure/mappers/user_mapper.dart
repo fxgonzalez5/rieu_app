@@ -9,6 +9,7 @@ class UserMapper {
     'roles': user.roles,
     'institution': user.institution,
     'city': user.city,
+    'courses': user.courses,
   };
 
   static UserEntity userJsonToEntity(Map<String, dynamic> json) => UserEntity(
@@ -19,5 +20,6 @@ class UserMapper {
     roles: List<String>.from(json['roles'].map((role) => role)),
     institution: json['institution'],
     city: json['city'],
+    courses: List<Map<String, dynamic>>.from(json['courses'].map((course) => course)),
   );
 }

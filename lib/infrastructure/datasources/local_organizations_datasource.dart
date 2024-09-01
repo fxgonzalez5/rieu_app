@@ -4,10 +4,10 @@ import 'package:rieu/domain/datasources/organizations_profiles_datasource.dart';
 import 'package:rieu/domain/entities/entities.dart';
 import 'package:rieu/infrastructure/mappers/organization_mapper.dart';
 
-class LocalOrganizationsDatasource implements OrganizationsProfilesDatasource {
+class LocalOrganizationsDataSource implements OrganizationsProfilesDataSource {
   final String jsonPath;
 
-  LocalOrganizationsDatasource({required this.jsonPath});
+  LocalOrganizationsDataSource({required this.jsonPath});
   
   @override
   Future<List<OrganizationProfile>> getOrganizations() async {

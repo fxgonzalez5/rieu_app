@@ -42,16 +42,26 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final responsive = Responsive(context);
 
     if ( pageController.hasClients ) {
-      pageController.animateToPage(
-        widget.pageIndex, 
-        curve: Curves.easeInOut, 
-        duration: const Duration(milliseconds: 350),
-      );
+      if ((pageController.page! + 3 == widget.pageIndex) || (pageController.page! - 3 == widget.pageIndex)) {
+        pageController.animateToPage(
+          widget.pageIndex, 
+          curve: Curves.easeInOut, 
+          duration: const Duration(milliseconds: 500),
+        );
+      } else {
+        pageController.animateToPage(
+          widget.pageIndex, 
+          curve: Curves.easeInOut, 
+          duration: const Duration(milliseconds: 350),
+        );
+      }
     }
 
     return Scaffold(
+      extendBody: true,
       body: PageView.builder(
         controller: pageController,
         physics: const NeverScrollableScrollPhysics(),
@@ -65,6 +75,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                   child: Column(
                     children: [
                       const _Head(),
+                      SizedBox(height: responsive.hp(1.5)),
                       Expanded(
                         child: viewRoutes[index]
                       )

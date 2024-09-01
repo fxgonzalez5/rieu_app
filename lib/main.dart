@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:rieu/config/firebase/firebase_options.dart';
 import 'package:rieu/config/router/router.dart';
 import 'package:rieu/config/theme/app_theme.dart';
+import 'package:rieu/domain/repositories/repositories.dart';
 import 'package:rieu/infrastructure/datasources/datasources.dart';
 import 'package:rieu/infrastructure/repositories/repositories.dart';
 import 'package:rieu/presentation/providers/providers.dart';
@@ -17,13 +18,15 @@ void main() async {
   );
   runApp(
     MultiProvider(
-      providers: [
+      providers: [  
         ChangeNotifierProvider(create: (_) => AuthProvider(authRepository: AuthRepositoryImpl())),
         ChangeNotifierProxyProvider<AuthProvider, RouterProvider>(
           create: (context) => RouterProvider(context.read<AuthProvider>()),
-          update: (context, authProvider, previous) => previous ?? RouterProvider(authProvider),
+          update: (_, authProvider, previous) => previous ?? RouterProvider(authProvider),
         ),
         Provider<GoRouter>(create: (context) => AppRouter(context.read<RouterProvider>()).goRouter, lazy: false),
+        Provider<CoursesRepository>(create: (_) => CoursesRepositoryImpl(FirebaseDataSource())),
+        Provider<OrganizationsProfilesRepository>(create: (_) => OrganizationsProfilesRepositoryImpl(LocalOrganizationsDataSource(jsonPath: 'assets/data/information.json'))),
       ],
       child: const MainApp()
     )
@@ -38,12 +41,10 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => CoursesProvider()),
-        ChangeNotifierProvider(create: (_) => CourseProvider()),
+        ChangeNotifierProvider(create: (context) => CoursesProvider(coursesRepository: context.read<CoursesRepository>())),
+        ChangeNotifierProvider(create: (context) => CourseProvider(getCourse: context.read<CoursesRepository>().getCourseById)),
         ChangeNotifierProvider(
-          create: (_) => OrganizationsProvider(
-            organizationsRepository:  OrganizationsProfilesRepositoryImpl(LocalOrganizationsDatasource(jsonPath: 'assets/data/information.json'))
-          ),
+          create: (context) => OrganizationsProvider(organizationsRepository: context.read<OrganizationsProfilesRepository>()),
           lazy: false,
         ),
       ],

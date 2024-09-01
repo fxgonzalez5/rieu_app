@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:rieu/config/helpers/text_formats.dart';
 import 'package:rieu/config/theme/responsive.dart';
+import 'package:rieu/domain/entities/entities.dart';
 import 'package:rieu/presentation/widgets/widgets.dart';
 
 class DescriptionView extends StatelessWidget {
+  final Course course;
   final bool isActive;
   
   const DescriptionView({
     super.key,
+    required this.course,
     required this.isActive,
   });
 
@@ -22,26 +24,17 @@ class DescriptionView extends StatelessWidget {
         children: [
           buildMainText(
             context,
-            detail: 'Lorem qui do ea culpa in nulla culpa irure excepteur ad esse. Tempor proident exercitation commodo voluptate consectetur fugiat officia esse mollit est ullamco id. Consectetur velit deserunt velit consectetur eiusmod officia ipsum est ea.',
-            profile: 'Docentes de la UTPL'
+            detail: course.trainingPurposes,
+            profile: course.directedTo
           ),
+          SizedBox(height: responsive.hp(2)),
           Text('Competencias a desarrollar', style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.bold)),
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: TextFormats.splitTextIntoLines('''
-              Excepteur velit elit mollit eiusmod magna deserunt ex dolor voluptate nulla.
-              Nostrud velit duis exercitation sunt anim aliqua ea exercitation nulla Lorem.
-              Id sint sint ex reprehenderit irure et nulla adipisicing reprehenderit.
-              '''
-            ).length,
+            itemCount: course.developingCompetences.length,
             itemBuilder: (BuildContext context, int index) {
-              final String text = TextFormats.splitTextIntoLines('''
-                Excepteur velit elit mollit eiusmod magna deserunt ex dolor voluptate nulla.
-                Nostrud velit duis exercitation sunt anim aliqua ea exercitation nulla Lorem.
-                Id sint sint ex reprehenderit irure et nulla adipisicing reprehenderit.
-                '''
-              )[index];
+              final String text = course.developingCompetences[index];
 
               return ListItem(
                 number: index + 1,
@@ -55,16 +48,21 @@ class DescriptionView extends StatelessWidget {
     );
   }
 
-  Column buildMainText(context, {required String detail, profile}) {
+  Column buildMainText(context, {required List<String> detail, required String profile}) {
     final responsive = Responsive(context);
     final texts = Theme.of(context).textTheme;
+
+    Widget buildDetail() {
+      if (detail.length == 1) return Text(detail.first);
+      return Column(children: List.generate(detail.length, (index) => ListItem(text: detail[index])),);
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Finalidades de la formación', style: texts.bodyLarge!.copyWith(fontWeight: FontWeight.bold)),
         SizedBox(height: responsive.hp(1)),
-        Text(detail),
+        buildDetail(),
         SizedBox(height: responsive.hp(1)),
         Text('Dirigido a', style: texts.bodyLarge!.copyWith(fontWeight: FontWeight.bold)),
         Text(profile),

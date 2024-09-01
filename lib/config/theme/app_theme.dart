@@ -24,7 +24,7 @@ class AppTheme {
         fontSize: Responsive(context).ip(3.6),
       ),
       headlineSmall: TextStyle(
-        fontSize: Responsive(context).ip(3.2),
+        fontSize: Responsive(context).ip(2.6),
       ),
       titleLarge: TextStyle(
         fontSize: Responsive(context).ip(2),

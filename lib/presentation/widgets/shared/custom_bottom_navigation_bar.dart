@@ -35,34 +35,40 @@ class CustomBottomNavigationBar extends StatelessWidget {
     final responsive = Responsive(context);
     final colors = Theme.of(context).colorScheme;
 
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      backgroundColor: colors.primary,
-      iconSize: responsive.ip(3),
-      selectedItemColor: Colors.white,
-      unselectedItemColor: Colors.black45,
-      showUnselectedLabels: false,
-      elevation: 0,
-      currentIndex: currentIndex,
-      onTap: (value) => onItemTapped(context, value),
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Inicio'
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.menu_book),
-          label: 'Mis Cursos'
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person),
-          label: 'Perfil'
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.info),
-          label: 'Información'
-        ),
-      ],
+    return Theme(
+      data: Theme.of(context).copyWith(
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent
+      ),
+      child: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: colors.primary,
+        iconSize: responsive.ip(3),
+        selectedItemColor: Colors.white,
+        unselectedItemColor: Colors.black45,
+        showUnselectedLabels: false,
+        elevation: 0,
+        currentIndex: currentIndex,
+        onTap: (value) => onItemTapped(context, value),
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Inicio'
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.menu_book),
+            label: 'Mis Cursos'
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Perfil'
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.info),
+            label: 'Información'
+          ),
+        ],
+      ),
     );
   }
 }

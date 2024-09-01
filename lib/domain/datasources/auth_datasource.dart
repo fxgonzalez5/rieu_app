@@ -1,4 +1,4 @@
-import 'package:rieu/domain/entities/entities.dart';
+import 'package:rieu/domain/entities/user_entity.dart';
 import 'package:rieu/infrastructure/services/services.dart';
 
 abstract class AuthDataSource {

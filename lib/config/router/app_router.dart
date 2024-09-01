@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:rieu/config/router/router_provider.dart';
 import 'package:rieu/presentation/providers/providers.dart';
 import 'package:rieu/presentation/screens/screens.dart';
@@ -48,7 +49,7 @@ class AppRouter {
         path: '/home/:page',
         name: HomeScreen.name,
         builder: (context, state) {
-          final pageIndex = int.parse( state.pathParameters['page'] ?? '0' );
+          final pageIndex = int.parse(state.pathParameters['page'] ?? '0');
           return HomeScreen(pageIndex: pageIndex);
         },
         routes: [
@@ -57,6 +58,7 @@ class AppRouter {
             name: CourseScreen.name,
             builder: (context, state) {
               final courseId = state.pathParameters['id'] ?? 'no-id';
+              context.read<CourseProvider>().loadCourse(courseId);
               return CourseScreen(courseId: courseId);
             },
           ),
