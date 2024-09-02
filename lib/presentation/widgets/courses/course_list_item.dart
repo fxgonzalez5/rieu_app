@@ -3,16 +3,19 @@ import 'package:go_router/go_router.dart';
 import 'package:rieu/config/theme/responsive.dart';
 
 class CourseListItem extends StatelessWidget {
-  final String imageUrl, title, subtitle;
-  final int progress, session;
+  final String courseId, imageUrl, title, subtitle;
+  final int progress;
+  final DateTime startDate, endDate;
 
   const CourseListItem({
     super.key,
+    required this.courseId,
     required this.imageUrl,
     required this.title,
     required this.subtitle,
     this.progress = 0,
-    this.session = 0
+    required this.startDate,
+    required this.endDate,
   });
 
   @override
@@ -23,7 +26,7 @@ class CourseListItem extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: responsive.hp(0.75)),
       child: GestureDetector(
-        onTap: () => context.push('${GoRouterState.of(context).matchedLocation}/course/${'1'}'),
+        onTap: () => context.push('${GoRouterState.of(context).matchedLocation}/course/$courseId'),
         child: SizedBox(
           height: responsive.wp(27.5),
           child: Row(
@@ -42,7 +45,7 @@ class CourseListItem extends StatelessWidget {
                     ),
                     const Spacer(),
                     _Subtitle(subtitle),
-                    _CustomProgress(progress, session)
+                    _CustomProgress(progress, startDate, endDate),
                   ],
                 ),
               )
@@ -55,13 +58,20 @@ class CourseListItem extends StatelessWidget {
 }
 
 class _CustomProgress extends StatelessWidget {
-  final int progress, session;
-  const _CustomProgress(this.progress, this.session);
+  final int progress;
+  final DateTime startDate, endDate;
+  const _CustomProgress(this.progress, this.startDate, this.endDate);
 
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
     final colors = Theme.of(context).colorScheme;
+
+    String progressStatus() {
+      if (DateTime.now().isBefore(startDate)) return 'No iniciado';
+      if (DateTime.now().isAfter(endDate)) return 'Finalizado';
+      return 'En curso';
+    }
 
     return Column(
       children: [
@@ -79,7 +89,7 @@ class _CustomProgress extends StatelessWidget {
             children: [
               Text('$progress%'),
               const Spacer(),
-              Text('Sesión $session', style: TextStyle(color: Colors.grey.shade600),)
+              Text(progressStatus(), style: TextStyle(color: Colors.grey.shade600),)
             ],
           ),
         )

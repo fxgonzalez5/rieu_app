@@ -19,6 +19,7 @@ class Course {
   final DateTime applicationDeadline;
   final bool authorization;
   final List<String> registeredUsers;
+  final int totalAuthorizedUsers;
 
   Course({
     required this.id,
@@ -41,6 +42,7 @@ class Course {
     required this.applicationDeadline,
     required this.authorization,
     required this.registeredUsers,
+    required this.totalAuthorizedUsers,
   });
 }
 

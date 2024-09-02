@@ -10,14 +10,26 @@ class AuthDataSourceImpl implements AuthDataSource {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
-  Future<UserEntity?> checkAuthStatus() async {
+  Stream<UserEntity?> checkAuthStatus() async* {
     try {
-      final user = await _auth.authStateChanges().first;
-      if (user == null) return null;
-
-      final DocumentSnapshot<Map<String, dynamic>> snapshot = await _firestore.collection('users').doc(user.uid).get();
-      final userEntity = UserMapper.userJsonToEntity(snapshot.data()!);
-      return userEntity;
+      // Escuchar los cambios en el estado de autenticación
+      await for (final user in _auth.authStateChanges()) {
+        if (user == null) {
+          yield null; // Si el usuario es null, se emite null
+        } else {
+          // Escuchar cambios en el documento del usuario en Firestore
+          final snapshot = _firestore.collection('users').doc(user.uid).snapshots();
+          
+          await for (final doc in snapshot) {
+            if (doc.exists) {
+              final userEntity = UserMapper.userJsonToEntity(doc.data()!);
+              yield userEntity; // Emitir el usuario actualizado
+            } else {
+              yield null; // Si el documento no existe, se emite null
+            }
+          }
+        }
+      }
     } catch (e) {
       throw Exception('Autenticación fallida');
     }
@@ -77,7 +89,7 @@ class AuthDataSourceImpl implements AuthDataSource {
     try {
       final userEntity = await authService.signInService();
       final document = await _firestore.collection('users').doc(userEntity.id).get();
-      if (document.exists) return userEntity;
+      if (document.exists) return UserMapper.userJsonToEntity(document.data()!);
       
       final userJson = UserMapper.userEntityToJson(userEntity);
       await _firestore.collection('users').doc(userEntity.id).set(userJson);

@@ -12,7 +12,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }) : datasource = datasource ?? AuthDataSourceImpl();
 
   @override
-  Future<UserEntity?> checkAuthStatus() {
+  Stream<UserEntity?> checkAuthStatus() {
     return datasource.checkAuthStatus();
   }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rieu/config/helpers/helpers.dart';
 import 'package:rieu/config/theme/responsive.dart';
+import 'package:rieu/domain/entities/entities.dart';
 import 'package:rieu/infrastructure/services/services.dart';
 import 'package:rieu/presentation/providers/providers.dart';
 import 'package:rieu/presentation/widgets/widgets.dart';
@@ -13,7 +14,7 @@ class ProfileView extends StatelessWidget {
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
     final texts = Theme.of(context).textTheme;
-    final user = context.read<AuthProvider>().state.user!;
+    final user = context.watch<UserProvider>().user;
 
     return SafeArea(
       child: Stack(
@@ -59,7 +60,7 @@ class ProfileView extends StatelessWidget {
                   )
                 ]
               ),
-              child: const _BoxContent(),
+              child: _BoxContent(user: user),
             ),
           )
         ],
@@ -69,7 +70,9 @@ class ProfileView extends StatelessWidget {
 }
 
 class _BoxContent extends StatelessWidget {
-  const _BoxContent();
+  final UserEntity user;
+
+  const _BoxContent({required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -85,13 +88,13 @@ class _BoxContent extends StatelessWidget {
             height: responsive.ip(0.25),
             color: Colors.grey[300]
           ),
-          const _Heading(),
+          _Heading(user),
           const Divider(
             height: 10,
             thickness: 2,
             color: Colors.black12,
           ),
-          const _Information(),
+          _Information(user),
           const Spacer(),
           SizedBox(
             width: double.infinity,
@@ -110,7 +113,9 @@ class _BoxContent extends StatelessWidget {
 }
 
 class _Information extends StatelessWidget {
-  const _Information();
+  final UserEntity user;
+
+  const _Information(this.user);
 
   @override
   Widget build(BuildContext context) {
@@ -126,11 +131,11 @@ class _Information extends StatelessWidget {
           Text('Historial', style: texts.titleSmall!.copyWith(fontWeight: FontWeight.bold)),
           RichText(
             text: TextSpan(
-              text: 'Eventos inscritos:',
+              text: 'Eventos inscritos: ',
               style: texts.bodyMedium!.copyWith(color: Colors.grey.shade600, fontWeight: FontWeight.w600),
               children: [
                 TextSpan(
-                  text: ' 24',
+                  text: '${user.totalCourses}',
                   style: texts.bodyMedium!.copyWith(color: Colors.grey.shade600)
                 )
               ]
@@ -142,7 +147,7 @@ class _Information extends StatelessWidget {
               style: texts.bodyMedium!.copyWith(color: Colors.grey.shade600, fontWeight: FontWeight.w600),
               children: [
                 TextSpan(
-                  text: 'Formación',
+                  text: user.mostActiveCourse,
                   style: texts.bodyMedium!.copyWith(color: Colors.grey.shade600)
                 )
               ]
@@ -154,7 +159,7 @@ class _Information extends StatelessWidget {
               style: texts.bodyMedium!.copyWith(color: Colors.grey.shade600, fontWeight: FontWeight.w600),
               children: [
                 TextSpan(
-                  text: '3',
+                  text: '${user.totalActiveCourses}',
                   style: texts.bodyMedium!.copyWith(color: Colors.grey.shade600)
                 )
               ]
@@ -166,7 +171,7 @@ class _Information extends StatelessWidget {
               style: texts.bodyMedium!.copyWith(color: Colors.grey.shade600, fontWeight: FontWeight.w600),
               children: [
                 TextSpan(
-                  text: '21',
+                  text: '${user.totalCoursesCompleted}',
                   style: texts.bodyMedium!.copyWith(color: Colors.grey.shade600)
                 )
               ]
@@ -179,13 +184,14 @@ class _Information extends StatelessWidget {
 }
 
 class _Heading extends StatelessWidget {
-  const _Heading();
+  final UserEntity user;
+
+  const _Heading(this.user);
 
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
     final texts = Theme.of(context).textTheme;
-    final user = context.read<AuthProvider>().state.user!;
     
     return Padding(
       padding: EdgeInsets.symmetric(vertical: responsive.ip(2.5)),

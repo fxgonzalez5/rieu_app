@@ -6,7 +6,7 @@ import 'package:rieu/domain/entities/entities.dart';
 import 'package:rieu/presentation/providers/providers.dart';
 import 'package:rieu/presentation/views/views.dart';
 
-class CourseScreen extends StatelessWidget {
+class CourseScreen extends StatefulWidget {
   static const String name = 'course_screen';
   final String courseId;
 
@@ -16,10 +16,28 @@ class CourseScreen extends StatelessWidget {
   });
 
   @override
+  State<CourseScreen> createState() => _CourseScreenState();
+}
+
+class _CourseScreenState extends State<CourseScreen> {
+  @override
+  void initState() {
+    super.initState();
+    final courseProvider = context.read<CourseProvider>();
+    
+    courseProvider.loadCourse(widget.courseId).whenComplete(
+      () => courseProvider.fetchCourseStatus(
+        user: context.read<UserProvider>().user,
+        courseId: widget.courseId,
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) { 
     final responsive = Responsive(context);
     final courseProvider = context.watch<CourseProvider>();
-    final course = courseProvider.coursesMap[courseId];
+    final course = courseProvider.coursesMap[widget.courseId];
 
     if (courseProvider.errorMessage.isNotEmpty) {
       return PopScope(
@@ -60,7 +78,6 @@ class CourseScreen extends StatelessWidget {
 
 class _CourseBody extends StatelessWidget {
   final Course course;
-  final CourseStatus status = CourseStatus.available;
   
   const _CourseBody({required this.course});
 
@@ -68,7 +85,8 @@ class _CourseBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
     final texts = Theme.of(context).textTheme;
-    final user = context.read<AuthProvider>().state.user!;
+    final user = context.watch<UserProvider>().user;
+    final status = context.watch<CourseProvider>().coursesStatusMap[course.id]!;
 
     return Stack(
       alignment: Alignment.bottomCenter,
@@ -80,7 +98,10 @@ class _CourseBody extends StatelessWidget {
               _BannerImage(image: course.posterPath),
               Padding(
                 padding: EdgeInsets.only(top: responsive.hp(2), bottom: responsive.hp(1)),
-                child: Text(course.name, style: texts.headlineSmall, textAlign: TextAlign.justify),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(course.name, style: texts.headlineSmall, textAlign: TextAlign.justify)
+                ),
               ),
               Container(
                 alignment: Alignment.centerLeft,
@@ -160,15 +181,16 @@ class _FloatingBox extends StatelessWidget {
         children: [
           Text(courseStatusData.text, style: const TextStyle(fontWeight: FontWeight.bold)),
           const Spacer(),
-          FilledButton(
-            style: ButtonStyle(
-              padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: responsive.wp(7.5), vertical: responsive.hp(1.5))),
-              backgroundColor: WidgetStatePropertyAll(colorButton()),
-              foregroundColor: const WidgetStatePropertyAll(Colors.white),
+          if (status != CourseStatus.unavailable)
+            FilledButton(
+              style: ButtonStyle(
+                padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: responsive.wp(7.5), vertical: responsive.hp(1.5))),
+                backgroundColor: WidgetStatePropertyAll(colorButton()),
+                foregroundColor: const WidgetStatePropertyAll(Colors.white),
+              ),
+              onPressed: status != CourseStatus.available ? null : () {},
+              child: Text(courseStatusData.textButton),
             ),
-            onPressed: status != CourseStatus.available ? null : () {},
-            child: Text(courseStatusData.textButton),
-          ),
         ],
       ),
     );
@@ -217,8 +239,8 @@ class _ContentTabsState extends State<_ContentTabs> with TickerProviderStateMixi
         course: widget.course,
         isActive: widget.status != CourseStatus.accepted && !widget.user.isAdmin
       ),
-      RegisterView(isAdmin: widget.user.isAdmin),
-      HistoryView(isAdmin: widget.user.isAdmin),
+      const RegisterView(),
+      HistoryView(courseId: widget.course.id),
     ];
   }
 

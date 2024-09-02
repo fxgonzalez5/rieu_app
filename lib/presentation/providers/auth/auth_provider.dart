@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:rieu/domain/entities/entities.dart';
 import 'package:rieu/domain/repositories/auth_repository.dart';
@@ -45,6 +47,7 @@ class AuthState {
 class AuthProvider with ChangeNotifier {
   final AuthRepository authRepository;
   AuthState _state = AuthState();
+  StreamSubscription<void>? _authSubscription;
 
   AuthProvider({
     required this.authRepository,
@@ -61,6 +64,7 @@ class AuthProvider with ChangeNotifier {
       errorMessage: '',
       alert: null
     );
+    
     notifyListeners();
   }
 
@@ -88,17 +92,19 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> checkAuthStatus() async {
-    try {
-      final user = await authRepository.checkAuthStatus();
-      if (user == null)  {
-        logoutUser();
-      } else {
-        _setLoggedUser(user);
+  void checkAuthStatus() {
+    _authSubscription = authRepository.checkAuthStatus().listen(
+      (user) {
+        if (user == null) {
+          logoutUser();
+        } else {
+          _setLoggedUser(user);
+        }
+      },
+      onError: (e) {
+        logoutUser(errorMessage: e.toString());
       }
-    } catch (e) {
-      logoutUser(errorMessage: e.toString());
-    }
+    );
   }
 
   Future<void> registerUser(String name, String email, String password, String institution, String city) async {
@@ -135,5 +141,11 @@ class AuthProvider with ChangeNotifier {
     } catch (e) {
       logoutUser(errorMessage: e.toString());
     }
+  }
+
+  @override
+  void dispose() {
+    _authSubscription?.cancel();
+    super.dispose();
   }
 }

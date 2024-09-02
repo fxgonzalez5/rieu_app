@@ -28,5 +28,6 @@ class CourseMapper {
     applicationDeadline: courseFirebase.applicationDeadline,
     authorization: courseFirebase.authorization,
     registeredUsers: courseFirebase.registeredUsers,
+    totalAuthorizedUsers: courseFirebase.totalAuthorizedUsers,
   );
 }

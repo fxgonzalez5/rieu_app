@@ -1,110 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/rendering.dart';
+import 'package:provider/provider.dart';
 import 'package:rieu/config/theme/responsive.dart';
+import 'package:rieu/domain/entities/entities.dart';
+import 'package:rieu/presentation/providers/providers.dart';
 import 'package:rieu/presentation/widgets/widgets.dart';
 
 
 class HistoryView extends StatelessWidget {
-  final bool isAdmin;
-  const HistoryView({super.key, required this.isAdmin});
+  final String courseId;
+
+  const HistoryView({super.key, required this.courseId});
 
   @override
   Widget build(BuildContext context) {
-    var student = {
-      'schedule': [
-        {
-          'dateDuration': 'Lunes 20 al Viernes 24 de Mayo del 2024',
-          'attendanceRecord': [
-            {'day': 'Miércoles', 'input': '08:00', 'output': '12:00', 'coffee': true},
-            {'day': 'Jueves', 'input': '08:00', 'output': '12:00', 'coffee': false},
-            {'day': 'Viernes', 'input': '08:00', 'output': '12:00', 'coffee': true},
-          ],
-          'totalAttendance': 3,
-          'totalRecords': 3,
-        },
-        {
-          'dateDuration': 'Lunes 27 al Viernes 31 de Mayo del 2024',
-          'attendanceRecord': [
-            {'day': 'Lunes', 'input': '08:00', 'output': '12:00', 'coffee': true},
-            {'day': 'Martes', 'input': '08:00', 'output': '12:00', 'coffee': false},
-            {'day': 'Miércoles', 'input': '08:00', 'output': '12:00', 'coffee': true},
-            {'day': 'Jueves', 'input': 'No registrada', 'output': 'No registrada', 'coffee': false},
-            {'day': 'Viernes', 'input': '', 'output': '', 'coffee': null},
-          ],
-          'totalAttendance': 3,
-          'totalRecords': 5,
-        },
-        {
-          'dateDuration': 'Lunes 03 al Viernes 08 de Junio del 2024',
-          'attendanceRecord': [
-            {'day': 'Lunes', 'input': '08:00', 'output': '12:00', 'coffee': true},
-            {'day': 'Martes', 'input': '08:00', 'output': '12:00', 'coffee': false},
-            {'day': 'Miércoles', 'input': '08:00', 'output': '12:00', 'coffee': true},
-            {'day': 'Jueves', 'input': 'No registrada', 'output': 'No registrada', 'coffee': false},
-            {'day': 'Viernes', 'input': '', 'output': '', 'coffee': null},
-          ],
-          'totalAttendance': 3,
-          'totalRecords': 5,
-        },
-        {
-          'dateDuration': 'Lunes 11 al Viernes 16 de Junio del 2024',
-          'attendanceRecord': [
-            {'day': 'Lunes', 'input': '08:00', 'output': '12:00', 'coffee': true},
-            {'day': 'Martes', 'input': '08:00', 'output': '12:00', 'coffee': false},
-          ],
-          'totalAttendance': 2,
-          'totalRecords': 2,
-        },
-      ]
-    };
-    
-    var admin = {
-      'schedule': [
-        {
-          'dateDuration': 'Lunes 20 de Mayo del 2024',
-          'attendanceRecord': [
-            {'name': 'Francisco González', 'input': '08:00', 'output': '12:00', 'coffee': true},
-            {'name': 'María Pérez', 'input': '08:00', 'output': '12:00', 'coffee': false},
-            {'name': 'Juan López', 'input': '08:00', 'output': '12:00', 'coffee': true},
-            {'name': 'Francisco González', 'input': '08:00', 'output': '12:00', 'coffee': true},
-            {'name': 'María Pérez', 'input': '08:00', 'output': '12:00', 'coffee': false},
-            {'name': 'Juan López', 'input': '08:00', 'output': '12:00', 'coffee': true},
-          ],
-          'totalAttendance': 6,
-        },
-        {
-          'dateDuration': 'Martes 21 de Mayo del 2024',
-          'attendanceRecord': [
-            {'name': 'Francisco González', 'input': '08:00', 'output': '12:00', 'coffee': true},
-            {'name': 'María Pérez', 'input': '08:00', 'output': '12:00', 'coffee': false},
-            {'name': 'Juan López', 'input': '08:00', 'output': '12:00', 'coffee': true},
-            {'name': 'Francisco González', 'input': '08:00', 'output': '12:00', 'coffee': true},
-            {'name': 'María Pérez', 'input': '08:00', 'output': '12:00', 'coffee': false},
-            {'name': 'Juan López', 'input': '08:00', 'output': '12:00', 'coffee': true},
-          ],
-          'totalAttendance': 6,
-        },
-        {
-          'dateDuration': 'Miércoles 22 de Mayo del 2024',
-          'attendanceRecord': [
-            {'name': 'Francisco González', 'input': '08:00', 'output': '12:00', 'coffee': true},
-            {'name': 'María Pérez', 'input': '08:00', 'output': '12:00', 'coffee': false},
-            {'name': 'Juan López', 'input': '08:00', 'output': '12:00', 'coffee': true},
-            {'name': 'Francisco González', 'input': '08:00', 'output': '12:00', 'coffee': true},
-            {'name': 'María Pérez', 'input': '08:00', 'output': '12:00', 'coffee': false},
-            {'name': 'Juan López', 'input': '08:00', 'output': '12:00', 'coffee': true},
-          ],
-          'totalAttendance': 6,
-        },
-      ],
-      'totalRecords': 6
-    };
-
     final responsive = Responsive(context);
     final texts = Theme.of(context).textTheme;
+    final courseProvider = context.read<CourseProvider>();
+    final userProvider = context.read<UserProvider>();
 
-    if (admin['totalRecords'] as int > 0) {
+    if (courseProvider.coursesMap[courseId]!.totalAuthorizedUsers > 0) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -113,8 +29,9 @@ class HistoryView extends StatelessWidget {
             child: Text('Registro de asistencias:', style: texts.bodyLarge!.copyWith(fontWeight: FontWeight.bold)),
           ),
           _ExpandableList(
-            isAdmin: isAdmin,
-            data: isAdmin ? admin : student,
+            isAdmin: userProvider.user.isAdmin,
+            attendanceData: userProvider.user.courses[courseId]!,
+            totalAuthorizedUsers: courseProvider.coursesMap[courseId]!.totalAuthorizedUsers,
           ),
         ],
       );
@@ -128,11 +45,13 @@ class HistoryView extends StatelessWidget {
 
 class _ExpandableList extends StatefulWidget {
   final bool isAdmin;
-  final Map<String, dynamic> data;
+  final List<AttendanceData> attendanceData;
+  final int totalAuthorizedUsers;
 
   const _ExpandableList({
-    required this.isAdmin,
-    required this.data,
+    this.isAdmin = false,
+    required this.attendanceData,
+    required this.totalAuthorizedUsers,
   });
 
   @override
@@ -148,8 +67,8 @@ class _ExpandableListState extends State<_ExpandableList> {
   void initState() {
     super.initState();
     scrollController = ScrollController();
-    controllers = List.generate(widget.data['schedule'].length,  (_) => ExpandableController());
-    keys.addAll(List.generate(widget.data['schedule'].length, (_) => GlobalKey()));
+    controllers = List.generate(widget.attendanceData.length,  (_) => ExpandableController());
+    keys.addAll(List.generate(widget.attendanceData.length, (_) => GlobalKey()));
   }
 
   @override
@@ -180,19 +99,17 @@ class _ExpandableListState extends State<_ExpandableList> {
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
-    final List<Map<String, dynamic>> schedule = widget.data['schedule'];
 
     return Expanded(
       child: ListView.builder(
         controller: scrollController,
         padding: EdgeInsets.only(bottom: responsive.hp(2)),
-        itemCount: schedule.length,
+        itemCount: widget.attendanceData.length,
         itemBuilder: (context, index) {
           final bool isExpanded = controllers[index].expanded;
           final bool isFirst = index == 0;
-          final bool isLast = index == schedule.length - 1;
-          final int totalAttendance = schedule[index]['totalAttendance'];
-          final int totalRecords = widget.data['totalRecords'] ?? schedule[index]['totalRecords'];
+          final bool isLast = index == widget.attendanceData.length - 1;
+          final AttendanceData attendanceRecord = widget.attendanceData[index];
           const TextStyle textStyle = TextStyle(fontWeight: FontWeight.bold);
 
 
@@ -207,9 +124,11 @@ class _ExpandableListState extends State<_ExpandableList> {
                 ),
                 collapsed: Collapsed(
                   decoration: buildDecorationCollapsed(context, isExpanded, isFirst, isLast),
-                  title: schedule[index]['dateDuration'],
+                  title: attendanceRecord.dateDuration,
                   titleStyle: textStyle,
-                  trailing: Text('$totalAttendance/$totalRecords', style: textStyle),
+                  trailing: widget.isAdmin
+                    ? Text('${attendanceRecord.totalAttendance}/${widget.totalAuthorizedUsers}', style: textStyle)
+                    : Text('${attendanceRecord.totalAttendance}/${attendanceRecord.records.length}', style: textStyle),
                   onExpansionChanged: (isExpanded) => setState(() {
                     for (int i = 0; i < controllers.length; i++) {
                       controllers[i].expanded = (i == index) ? isExpanded : false;
@@ -223,7 +142,7 @@ class _ExpandableListState extends State<_ExpandableList> {
                   border: const TableBorder.symmetric(inside: BorderSide()),
                   children: [
                     buildTableHeader(context),
-                    ...schedule[index]['attendanceRecord'].map((attendanceRecord) => buildTableBody(context, attendanceRecord: attendanceRecord))
+                    ...attendanceRecord.records.map((record) => buildTableBody(context, record: record)),
                   ],
                 ),
               ),
@@ -234,7 +153,7 @@ class _ExpandableListState extends State<_ExpandableList> {
     );
   }
 
-  TableRow buildTableBody(BuildContext context, {required Map<String, dynamic> attendanceRecord}) {
+  TableRow buildTableBody(BuildContext context, {required Record record}) {
     final responsive = Responsive(context);
 
     return TableRow(
@@ -244,15 +163,15 @@ class _ExpandableListState extends State<_ExpandableList> {
             height: responsive.hp(5),
             padding: EdgeInsets.symmetric(horizontal: responsive.wp(2)),
             alignment: Alignment.centerLeft,
-            child: Text(widget.isAdmin ? attendanceRecord['name'] : attendanceRecord['day']),
+            child: Text(record.name),
           ),
         ),
-        TableCell(child: Text(attendanceRecord['input'], textAlign: TextAlign.center)),
-        TableCell(child: Text(attendanceRecord['output'], textAlign: TextAlign.center)),
+        TableCell(child: Text(record.input, textAlign: TextAlign.center)),
+        TableCell(child: Text(record.output, textAlign: TextAlign.center)),
         TableCell(
-          child: attendanceRecord['coffee'] == null 
+          child: record.coffee == null 
             ? const SizedBox()
-            : attendanceRecord['coffee']
+            : record.coffee!
               ? const Icon(Icons.check)
               : const Icon(Icons.close),
         )

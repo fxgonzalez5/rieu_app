@@ -4,8 +4,11 @@ import 'package:rieu/config/theme/responsive.dart';
 import 'package:rieu/presentation/providers/providers.dart';
 
 class CustomSearchBar extends StatelessWidget {
+  final VoidCallback? searchCallback;
+
   const CustomSearchBar({
     super.key,
+    this.searchCallback,
   });
 
   @override
@@ -25,12 +28,15 @@ class CustomSearchBar extends StatelessWidget {
         ),
       ),
       backgroundColor: WidgetStatePropertyAll(colors.surface),
+      hintText: 'Buscar cursos',
+      hintStyle: const WidgetStatePropertyAll(TextStyle(color: Colors.grey)),
+      onSubmitted: (_) => searchCallback?.call(),
       trailing: [
         IconButton(
           icon: Icon(Icons.search, size: responsive.ip(2.5), color: colors.primary,),
           onPressed: () {
             FocusScope.of(context).unfocus();
-            coursesProvider.toggleCourseSearch();
+            searchCallback?.call();
           },
         ),
       ],

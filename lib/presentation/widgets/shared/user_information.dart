@@ -13,7 +13,7 @@ class UserInformation extends StatelessWidget {
     final responsive = Responsive(context);
     final colors = Theme.of(context).colorScheme;
     final texts = Theme.of(context).textTheme;
-    final user = context.read<AuthProvider>().state.user!;
+    final user = context.read<UserProvider>().user;
 
     return Row(
       children: [

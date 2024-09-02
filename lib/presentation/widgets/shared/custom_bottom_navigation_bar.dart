@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:rieu/config/theme/responsive.dart';
+import 'package:rieu/presentation/providers/courses/courses_provider.dart';
 
 class CustomBottomNavigationBar extends StatelessWidget {
   final int currentIndex;
@@ -11,6 +13,9 @@ class CustomBottomNavigationBar extends StatelessWidget {
   });
 
   void onItemTapped( BuildContext context, int index ) {
+    if (index < 2) context.read<CoursesProvider>().pageChanged(index);
+    FocusScope.of(context).unfocus();
+
     switch(index) {
       case 0:
         context.go('/home/0');

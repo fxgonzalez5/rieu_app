@@ -15,7 +15,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMixin {
+class _HomeScreenState extends State<HomeScreen> {
   late PageController pageController;
   final viewRoutes = const [
     HomeView(),
@@ -41,7 +41,6 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     final responsive = Responsive(context);
 
     if ( pageController.hasClients ) {
@@ -67,14 +66,14 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
         physics: const NeverScrollableScrollPhysics(),
         itemCount: viewRoutes.length,
         itemBuilder: (context, index) {
-          return index < 2
-          ? Stack(
+          if (index < 2) {
+            return Stack(
               children: [
                 const BackgroundImages(),
                 SafeArea(
                   child: Column(
                     children: [
-                      const _Head(),
+                      _Head(pageIndex: index),
                       SizedBox(height: responsive.hp(1.5)),
                       Expanded(
                         child: viewRoutes[index]
@@ -83,20 +82,21 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                   )
                 ),
               ]
-            )
-          : viewRoutes[index];
+            );
+          } else {
+            return viewRoutes[index];
+          }
         },
       ),
       bottomNavigationBar: CustomBottomNavigationBar(currentIndex: widget.pageIndex),
     );
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }
 
 class _Head extends StatelessWidget {
-  const _Head();
+  final int pageIndex;
+
+  const _Head({required this.pageIndex});
 
   @override
   Widget build(BuildContext context) {
@@ -115,7 +115,7 @@ class _Head extends StatelessWidget {
               children: [
                 const UserInformation(),
                 SizedBox(height: responsive.ip(2)),
-                const CustomSearchBar(),
+                CustomSearchBar(searchCallback: () => coursesProvider.toggleCourseSearch(pageIndex)),
               ],
             ),
           ),
@@ -123,7 +123,7 @@ class _Head extends StatelessWidget {
           CategoryFilter(
             categories: coursesProvider.categories,
             currentCategory: coursesProvider.categories.indexOf(coursesProvider.currentCategory),
-            onTap: (value) => coursesProvider.currentCategory = value,
+            onTap: (value) => coursesProvider.fetchCoursesByCategory(value, pageIndex),
           ),
         ],
       ),
