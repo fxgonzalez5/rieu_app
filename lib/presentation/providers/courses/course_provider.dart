@@ -15,6 +15,11 @@ class CourseStatusData {
   });
 }
 
+const List<CourseStatusData> _administratorCourseStatuses = [
+  CourseStatusData(status: CourseStatus.available, text: 'Curso disponible', textButton: 'Registrar'),
+  CourseStatusData(status: CourseStatus.unavailable, text: 'Curso no disponible', textButton: ''),
+];
+
 const List<CourseStatusData> _courseStatusList = [
   CourseStatusData(status: CourseStatus.available, text: 'Participa en el curso', textButton: 'Inscribirme'),
   CourseStatusData(status: CourseStatus.unavailable, text: 'Tiempo de inscripción finalizado', textButton: ''),
@@ -77,7 +82,10 @@ class CourseProvider extends ChangeNotifier {
     }
   }
 
-  CourseStatusData getCourseStatusData(CourseStatus status) {
+  CourseStatusData getCourseStatusData(CourseStatus status, [bool isAdmin = false]) {
+    if (isAdmin) {
+      return _administratorCourseStatuses.firstWhere((element) => element.status == status);
+    } 
     return _courseStatusList.firstWhere((element) => element.status == status);
   }
 }

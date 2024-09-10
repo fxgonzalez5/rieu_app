@@ -131,8 +131,11 @@ class _CourseBody extends StatelessWidget {
           )
         ),
 
-        if (status != CourseStatus.accepted && !user.isAdmin)
-          _FloatingBox(status: status),
+        if (status != CourseStatus.accepted)
+          _FloatingBox(
+            status: status,
+            user: user,
+          ),
       ],
     );
   }
@@ -140,15 +143,17 @@ class _CourseBody extends StatelessWidget {
 
 class _FloatingBox extends StatelessWidget {
   final CourseStatus status;
+  final UserEntity user;
   
   const _FloatingBox({
     required this.status,
+    required this.user,
   });
 
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
-    final courseStatusData = context.read<CourseProvider>().getCourseStatusData(status);
+    final courseStatusData = context.read<CourseProvider>().getCourseStatusData(status, user.isAdmin);
 
     Color? colorButton() {
       switch (status) {
@@ -188,7 +193,12 @@ class _FloatingBox extends StatelessWidget {
                 backgroundColor: WidgetStatePropertyAll(colorButton()),
                 foregroundColor: const WidgetStatePropertyAll(Colors.white),
               ),
-              onPressed: status != CourseStatus.available ? null : () {},
+              onPressed: status != CourseStatus.available 
+                ? null 
+                : () {
+                  // TODO: Implementar la lógica para registrar al usuario en el curso
+                  // TODO: Implementar la logica para registrar al administrador en el curso, si tiene permitida dicha categoría
+                },
               child: Text(courseStatusData.textButton),
             ),
         ],
@@ -233,11 +243,11 @@ class _ContentTabsState extends State<_ContentTabs> with TickerProviderStateMixi
     return [
       DescriptionView(
         course: widget.course,
-        isActive: widget.status != CourseStatus.accepted && !widget.user.isAdmin
+        isActive: widget.status != CourseStatus.accepted
       ),
       SectionView(
         course: widget.course,
-        isActive: widget.status != CourseStatus.accepted && !widget.user.isAdmin
+        isActive: widget.status != CourseStatus.accepted
       ),
       const RegisterView(),
       HistoryView(courseId: widget.course.id),
@@ -254,7 +264,7 @@ class _ContentTabsState extends State<_ContentTabs> with TickerProviderStateMixi
           controller: tabController,
           overlayColor: const WidgetStatePropertyAll(Colors.transparent),
           onTap: (index) {
-            if (index > viewTabs.length - 3 && widget.status != CourseStatus.accepted && !widget.user.isAdmin) {
+            if (index > viewTabs.length - 3 && widget.status != CourseStatus.accepted) {
               tabController.animateTo(tabController.previousIndex);
             }
           },
@@ -263,14 +273,14 @@ class _ContentTabsState extends State<_ContentTabs> with TickerProviderStateMixi
             Tab(icon: Icon(Icons.list, size: iconTheme.size)),
             Tab(
               icon: Icon(Icons.app_registration_rounded, size: iconTheme.size,
-                color: widget.status != CourseStatus.accepted && !widget.user.isAdmin
+                color: widget.status != CourseStatus.accepted
                   ? Colors.grey 
                   : null,
               ),
             ),
             Tab(
               icon: Icon(Icons.history, size: iconTheme.size,
-                color: widget.status != CourseStatus.accepted && !widget.user.isAdmin
+                color: widget.status != CourseStatus.accepted
                   ? Colors.grey 
                   : null,
               ),

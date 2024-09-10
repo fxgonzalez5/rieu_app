@@ -13,6 +13,7 @@ class UserEntity {
   final String mostActiveCourse;
   final int totalActiveCourses;
   final int totalCoursesCompleted;
+  final List<String>? allowedCoursesTypes;
 
   UserEntity({
     required this.id,
@@ -27,6 +28,7 @@ class UserEntity {
     this.mostActiveCourse = 'Ninguno',
     this.totalActiveCourses = 0,
     this.totalCoursesCompleted = 0,
+    this.allowedCoursesTypes,
   });
 
   bool get isAdmin => roles.contains('admin');

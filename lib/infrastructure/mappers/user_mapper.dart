@@ -31,5 +31,6 @@ class UserMapper {
     mostActiveCourse: json['mostActiveCourse'],
     totalActiveCourses: json['totalActiveCourses'],
     totalCoursesCompleted: json['totalCoursesCompleted'],
+    allowedCoursesTypes: json['allowedCoursesTypes'] == null ? null : List<String>.from(json['allowedCoursesTypes'].map((type) => type)),
   );
 }
