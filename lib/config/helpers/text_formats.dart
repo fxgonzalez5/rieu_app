@@ -58,4 +58,10 @@ class TextFormats {
 
     return formatter.format(dateTime);
   }
+
+  static String time(DateTime dateTime) {
+    final formatter = DateFormat('HH:mm a');
+
+    return formatter.format(dateTime);
+  }
 }

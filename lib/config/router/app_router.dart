@@ -34,7 +34,7 @@ class AppRouter {
         path: '/process-completed',
         name: ProcessCompletedScreen.name,
         builder: (context, state) {
-          final extra = state.extra as Map<String, String>;
+          final extra = state.extra as Map<String, String?>;
 
           return ProcessCompletedScreen(
             title: extra['title'] ?? 'Proceso Completado',
@@ -59,6 +59,17 @@ class AppRouter {
               final courseId = state.pathParameters['id'] ?? 'no-id';
               return CourseScreen(courseId: courseId);
             },
+            routes: [
+              GoRoute(
+                path: 'qr-scan/:type',
+                name: QrScanScreen.name,
+                builder: (context, state) {
+                  final type = state.pathParameters['type'] ?? 'no-type';
+                  final nextRoute = state.extra as String?;
+                  return QrScanScreen(qrType: type, nextRoute: nextRoute);
+                },
+              )
+            ]
           ),
         ]
       ),

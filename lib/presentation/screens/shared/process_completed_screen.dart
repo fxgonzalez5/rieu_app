@@ -218,7 +218,10 @@ class _Content extends StatelessWidget {
         SizedBox(height: responsive.hp(15)),
         Text(caption, style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.w600)),
         SizedBox(height: responsive.hp(2.5)),
-        if (message != null) Text(message!, style: Theme.of(context).textTheme.bodyLarge),
+        if (message != null) SizedBox(
+          width: responsive.wp(70),
+          child: Text(message!, style: Theme.of(context).textTheme.bodyLarge, textAlign: TextAlign.center),
+        ),
         SizedBox(height: responsive.hp(5)),
         FilledButton(
           style: ButtonStyle(

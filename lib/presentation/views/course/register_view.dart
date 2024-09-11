@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:rieu/config/theme/responsive.dart';
 import 'package:rieu/presentation/providers/providers.dart';
@@ -30,17 +31,26 @@ class RegisterView extends StatelessWidget {
               buildListTile(context, 
                 title: '1. Registro de entrada',
                 subtitle: 'Escanea el código QR proporcionado por el instructor o la institución al ingresar para registrar tu asistencia.',
-                onPressed: () {}, //TODO: Desactivar el botón cuando el estudiante realice el registro correctamente
+                onPressed: () {
+                  //TODO: Desactivar el botón cuando el estudiante realice el registro correctamente
+                  context.push('${GoRouterState.of(context).matchedLocation}/qr-scan/input', extra: GoRouterState.of(context).matchedLocation);
+                },
               ),
               buildListTile(context, 
                 title: '2. Registro de salida',
                 subtitle: 'Escanea el código QR proporcionado por el instructor o la institución al salir para registrar tu asistencia.',
-                onPressed: () {}, //TODO: Desactivar el botón cuando el estudiante realice el registro correctamente
+                onPressed: () {
+                  //TODO: Desactivar el botón cuando el estudiante realice el registro correctamente
+                  context.push('${GoRouterState.of(context).matchedLocation}/qr-scan/output', extra: GoRouterState.of(context).matchedLocation);
+                },
               ),
               buildListTile(context, 
                 title: '3. Registro de comida',
                 subtitle: 'Escanea el código QR designado para el registro de comida en el tiempo establecido.',
-                onPressed: () {}, //TODO: Desactivar el botón cuando el estudiante realice el registro correctamente
+                onPressed: () {
+                  //TODO: Desactivar el botón cuando el estudiante realice el registro correctamente
+                  context.push('${GoRouterState.of(context).matchedLocation}/qr-scan/coffe', extra: GoRouterState.of(context).matchedLocation);
+                },
               )
             ]
         ],
