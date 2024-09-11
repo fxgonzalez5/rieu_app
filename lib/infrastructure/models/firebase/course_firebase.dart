@@ -19,7 +19,7 @@ class CourseFirebase {
   final DateTime applicationDeadline;
   final bool authorization;
   final List<String> registeredAdministrators;
-  final List<String> registeredUsers;
+  final Map<String, double?> registeredUsers;
   final int totalAuthorizedUsers;
 
   CourseFirebase({
@@ -68,7 +68,7 @@ class CourseFirebase {
     applicationDeadline: DateTime.parse(json["applicationDeadline"]),
     authorization: json["authorization"],
     registeredAdministrators: List<String>.from(json["registeredAdministrators"].map((x) => x)),
-    registeredUsers: List<String>.from(json["registeredUsers"].map((x) => x)),
+    registeredUsers: Map<String, double?>.from(json["registeredUsers"]).map((k, v) => MapEntry<String, double?>(k, v)),
     totalAuthorizedUsers: json["totalAuthorizedUsers"],
   );
 
@@ -93,7 +93,7 @@ class CourseFirebase {
     "applicationDeadline": applicationDeadline.toIso8601String(),
     "authorization": authorization,
     "registeredAdministrators": List<dynamic>.from(registeredAdministrators.map((x) => x)),
-    "registeredUsers": List<dynamic>.from(registeredUsers.map((x) => x)),
+    "registeredUsers": Map<String, double?>.from(registeredUsers).map((k, v) => MapEntry<String, double?>(k, v)),
     "totalAuthorizedUsers": totalAuthorizedUsers,
   };
 }

@@ -122,7 +122,9 @@ class _CourseBody extends StatelessWidget {
                   scrollDirection: Axis.horizontal,
                   itemCount: course.instructors.length,
                   itemBuilder: (context, index) => Padding(
-                    padding: EdgeInsets.only(right: responsive.wp(10)),
+                    padding: (course.instructors.length - 1) != index
+                      ? EdgeInsets.only(right: responsive.wp(7.5))
+                      : EdgeInsets.zero,
                     child: _InstructorPanel(
                       image: course.instructors[index].photoPath,
                       name: course.instructors[index].name,
@@ -130,7 +132,7 @@ class _CourseBody extends StatelessWidget {
                   ),
                 ),
               ),
-              _OverviewSection(course),
+              _OverviewSection(course, status),
               Expanded(
                 child: _ContentTabs(
                   user: user,
@@ -312,21 +314,54 @@ class _ContentTabsState extends State<_ContentTabs> with TickerProviderStateMixi
 
 class _OverviewSection extends StatelessWidget {
   final Course course;
+  final CourseStatus status;
 
-  const _OverviewSection(this.course);
+  const _OverviewSection(this.course, this.status);
 
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
+    final user = context.watch<UserProvider>().user;
 
     return SizedBox(
       height: responsive.hp(12.5),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      child: Row(
         children: [
-          buildRow(context, icon: Icons.apartment, leftText: course.location, rightText: course.modality),
-          buildRow(context, icon: Icons.schedule, leftText: '${course.duration} horas', rightText: course.schedule),
-          buildRow(context, icon: Icons.calendar_today_outlined, leftText: TextFormats.date(course.startDate), rightText: TextFormats.date(course.endDate)),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              buildRow(context, icon: Icons.apartment, leftText: course.location, rightText: course.modality),
+              buildRow(context, icon: Icons.schedule, leftText: '${course.duration} horas', rightText: course.schedule),
+              buildRow(context, icon: Icons.calendar_today_outlined, leftText: TextFormats.date(course.startDate), rightText: TextFormats.date(course.endDate)),
+            ],
+          ),
+          const Spacer(),
+          if (!user.isAdmin && status == CourseStatus.accepted)
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton.filled(
+                  style: ButtonStyle(
+                    shape: WidgetStatePropertyAll(
+                      RoundedRectangleBorder(borderRadius: BorderRadius.circular(responsive.ip(1.5)))
+                    )
+                  ),
+                  padding: EdgeInsets.all(responsive.wp(1)),
+                  color: Theme.of(context).colorScheme.secondary,
+                  highlightColor: Colors.transparent,
+                  iconSize: responsive.wp(8),
+                  icon: const Icon(Icons.star_outlined),
+                  onPressed: () => showRatingDialog(context,
+                    initialRating: course.registeredUsers[user.id],
+                    onRatingUpdate: (rating) {
+                      // TODO: Implementar la actualización de la calificación
+                    }
+                  ),
+                ),
+                const Text('Deja tu\ncalificación', textAlign: TextAlign.center),
+              ],
+            )
         ],
       ),
     );

@@ -18,7 +18,7 @@ class Course {
   final DateTime creationDate;
   final DateTime applicationDeadline;
   final bool authorization;
-  final List<String> registeredUsers;
+  final Map<String, double?> registeredUsers;
   final int totalAuthorizedUsers;
 
   Course({
