@@ -30,7 +30,7 @@ class InfoTile extends StatelessWidget {
           Image.asset(
             image,
             width: responsive.wp(27.5),
-            fit: BoxFit.fitWidth,
+            height: responsive.hp(12.5),
           ),
           SizedBox(width: responsive.ip(1.5)),
           Expanded(
@@ -41,7 +41,6 @@ class InfoTile extends StatelessWidget {
                 Text(title, style: texts.titleSmall),
                 SizedBox(height: responsive.hp(1),),
                 Text('"$subTitle"', style: texts.bodyLarge!.copyWith(color: Colors.grey), maxLines: 2,),
-                SizedBox(height: responsive.hp(2),),
                 TextButton(
                   onPressed: link != null
                     ? () => openUrl(link!)

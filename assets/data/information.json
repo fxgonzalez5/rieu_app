@@ -1,5 +1,11 @@
 [
   {
+    "name": "Red de Innovación Educativa Universitaria",
+    "slogan": "Alianza para una educación que transforma",
+    "imagePath": "assets/images/logo_rieu.png",
+    "website": "https://rieu.ec/"
+  },
+  {
     "name": "Proyecto Ascendere",
     "slogan": "Recuerda Superarte Siempre",
     "imagePath": "assets/images/logo_proyecto_ascendere.png",
