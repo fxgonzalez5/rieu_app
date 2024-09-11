@@ -5,6 +5,7 @@ import 'package:rieu/config/theme/responsive.dart';
 import 'package:rieu/domain/entities/entities.dart';
 import 'package:rieu/presentation/providers/providers.dart';
 import 'package:rieu/presentation/views/views.dart';
+import 'package:share_plus/share_plus.dart';
 
 class CourseScreen extends StatefulWidget {
   static const String name = 'course_screen';
@@ -67,7 +68,17 @@ class _CourseScreenState extends State<CourseScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.share),
-            onPressed: () {},
+            onPressed: () => Share.share(
+              '''${course.posterPath}
+¡Mira este curso interesante!
+
+${course.name}
+Fecha de inicio: ${TextFormats.date(course.startDate)}
+Fecha de fin: ${TextFormats.date(course.endDate)}
+Duración: ${course.duration} horas
+
+Descarga la aplicación para más información.'''
+            ),
           ),
         ],
       ),

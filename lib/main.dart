@@ -3,8 +3,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-
-
 import 'package:rieu/config/firebase/firebase_options.dart';
 import 'package:rieu/config/router/router.dart';
 import 'package:rieu/config/theme/app_theme.dart';

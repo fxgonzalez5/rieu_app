@@ -4,7 +4,7 @@ import 'package:rieu/infrastructure/models/models.dart';
 class CourseMapper {
   static Course courseFirebaseToEntity(CourseFirebase courseFirebase) => Course(
     id: courseFirebase.id,
-    posterPath: courseFirebase.posterPath ?? 'https://iglesiadeconcepcion.cl/wp-content/themes/theme-arzobispado/includes/img/imagen-no-disponible.jpeg',
+    posterPath: courseFirebase.posterPath ?? 'https://firebasestorage.googleapis.com/v0/b/app-liid-9ede6.appspot.com/o/Course%2Fno-image.jpeg?alt=media&token=816cd4b6-3c53-4fce-bd79-1873853519ce',
     name: courseFirebase.courseName,
     trainingPurposes: courseFirebase.learningObjectives,
     directedTo: courseFirebase.participantsProfile,
