@@ -19,6 +19,7 @@ class QrScanScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
+    final texts = Theme.of(context).textTheme;
 
     String translateTypeIntoSpanish(String type) {
       switch (type) {
@@ -33,77 +34,113 @@ class QrScanScreen extends StatelessWidget {
       }
     }
 
-    return Scaffold(
-      appBar: AppBar(),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _CustomQrScanner(qrType, nextRoute),
-            SizedBox(height: responsive.hp(5),),
-            SizedBox(
-              width: responsive.wp(50),
-              child: Text(
-                'Escanea el código QR para registrar tu ${translateTypeIntoSpanish(qrType)}',
-                style: TextStyle(
-                  fontSize: responsive.ip(1.6),
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey,
+    return PopScope(
+      onPopInvoked: (_) => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+      child: Scaffold(
+        appBar: AppBar(),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _CustomQrScanner(qrType, nextRoute),
+              SizedBox(height: responsive.hp(5)),
+              SizedBox(
+                width: responsive.wp(50),
+                child: Text(
+                  'Escanea el código QR para registrar ${(qrType == 'coffe') ? 'el' : 'la'} ${translateTypeIntoSpanish(qrType)}',
+                  style: texts.titleSmall!.copyWith(color: Colors.grey, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
               ),
-            ),
-          ],
-        ),
-     ),
-   );
+            ],
+          ),
+       ),
+         ),
+    );
   }
 }
 
-class _CustomQrScanner extends StatelessWidget {
+class _CustomQrScanner extends StatefulWidget {
   final String qrType;
   final String? nextRoute;
 
   const _CustomQrScanner(this.qrType, this.nextRoute);
 
   @override
+  State<_CustomQrScanner> createState() => _CustomQrScannerState();
+}
+
+class _CustomQrScannerState extends State<_CustomQrScanner> with TickerProviderStateMixin {
+  late AnimationController animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    animationController = AnimationController(vsync: this);
+  }
+
+  @override
+  void dispose() {
+    animationController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
     final colors = Theme.of(context).colorScheme;
-    final courseId = nextRoute?.split('/').last ?? 'no-id';
-    final qrProvider = context.read<QrProvider>();
-    final course = context.read<CourseProvider>().coursesMap[courseId];
+    final courseProvider = context.read<CourseProvider>();
+    final user = context.read<UserProvider>().user;
+    final courseId = widget.nextRoute?.split('/').last;
+    final course = courseProvider.coursesMap[courseId ?? 'no-id'];
 
-    return SizedBox(
-      width: responsive.wp(75),
-      height: responsive.wp(75),
+    return SizedBox.square(
+      dimension: responsive.wp(75),
       child: Stack(
         children: [
           QRView(
-            key: qrProvider.qrKey,
-            onQRViewCreated: (controller) => qrProvider.onQRViewCreated(controller, qrType).then((success) {
+            key: courseProvider.qrKey,
+            onQRViewCreated: (controller) => courseProvider.onQRViewCreated(controller, widget.qrType).listen((success) {
+              animationController.stop();
               if (success) {
-                controller.stopCamera();
+                if (user.isAdmin) {
+                  showAlert(context, '¡Enhorabuena!', 'Se ha registrado el recibimiento del café correctamente.',
+                    onContinue: () {
+                      controller.resumeCamera();
+                      animationController.repeat(reverse: true);
+                    }
+                  );
+                  return;
+                } 
                 context.go('/process-completed', extra: {
                   'title': 'Asistencia Registrada',
                   'subtitle': course != null ? '${course.name}\n${TextFormats.date(DateTime.now())} ${TextFormats.time(DateTime.now())}' : null,
-                  'nextRoute': nextRoute
+                  'nextRoute': widget.nextRoute
                 });
               } else {
-                // TODO: Mostrar un mensaje de error
-                controller.resumeCamera();
+                showSnackBarWhitAction(context, message: 'El código QR no es válido', onPressed: () {
+                  controller.resumeCamera();
+                  animationController.repeat(reverse: true);
+                });
               }
+            }).onError((e) {
+              animationController.stop();
+              showSnackBarWhitAction(context, message: e.toString().replaceAll('Exception: ', ''), onPressed: () {
+                controller.resumeCamera();
+                animationController.repeat(reverse: true);
+              });
             }),
             overlay: QrScannerOverlayShape(
               overlayColor: Colors.white,
               borderColor: colors.secondary,
-              borderWidth: responsive.ip(1.25),
-              borderLength: responsive.ip(5),
+              borderWidth: responsive.ip(1.5),
+              borderLength: responsive.wp(15),
               cutOutSize: double.infinity,
             ),
           ),
           
           Animate(
+            controller: animationController,
             onPlay: (controller) => controller.repeat(reverse: true),
             effects: [
               MoveEffect(

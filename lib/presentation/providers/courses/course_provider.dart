@@ -1,4 +1,8 @@
-import 'package:flutter/foundation.dart';
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:flutter/widgets.dart';
+import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:rieu/domain/entities/entities.dart';
 
 enum CourseStatus {available, unavailable, pending, canceled, accepted}
@@ -31,6 +35,7 @@ class CourseProvider extends ChangeNotifier {
   final Map<String, Course> _coursesMap = {};
   final Map<String, CourseStatus> _coursesStatusMap = {};
   final GetCourseCallback getCourse;
+  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   String _errorMessage = '';
 
   CourseProvider({required this.getCourse});
@@ -88,4 +93,40 @@ class CourseProvider extends ChangeNotifier {
     } 
     return _courseStatusList.firstWhere((element) => element.status == status);
   }
+
+  Stream<bool> onQRViewCreated(QRViewController controller, String qrType) async* {
+    yield* controller.scannedDataStream.asyncMap((scanData) async {
+      try {
+        if (scanData.code == null) {
+          controller.pauseCamera();
+          return false;
+        }
+
+        final jsonMap = jsonDecode(scanData.code!);
+        controller.pauseCamera();
+
+        if (jsonMap is Map && jsonMap.isNotEmpty) {
+          /// El modelo de jsonMap a utilizar es el siguiente:
+          /// {
+          ///   "userId": "String",
+          ///   "date": "DateTime",
+          ///   "courseId": "String",
+          /// }
+          final Map<String, String> result = jsonMap.map((key, value) => MapEntry(key, value));
+          try {
+            await Future.delayed(const Duration(seconds: 1));
+            return true;
+          } catch (e) {
+            throw Exception('Error al realizar el registro, intente nuevamente.');
+          }
+        } 
+        return false;
+      } catch (e) {
+        if (e.toString().contains('Error')) rethrow;
+        controller.pauseCamera();
+        return false;
+      }
+    });
+  }
+
 }

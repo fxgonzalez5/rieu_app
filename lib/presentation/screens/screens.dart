@@ -1,3 +1,4 @@
+export 'package:rieu/presentation/screens/courses/qr_generation_screen.dart';
 export 'package:rieu/presentation/screens/courses/qr_scan_screen.dart';
 export 'package:rieu/presentation/screens/courses/course_screen.dart';
 export 'package:rieu/presentation/screens/courses/home_screen.dart';

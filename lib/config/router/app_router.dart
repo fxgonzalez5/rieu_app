@@ -68,6 +68,14 @@ class AppRouter {
                   final nextRoute = state.extra as String?;
                   return QrScanScreen(qrType: type, nextRoute: nextRoute);
                 },
+              ),
+              GoRoute(
+                path: 'qr-generation',
+                name: QrGenerationScreen.name,
+                builder: (context, state) {
+                  final courseId = state.extra as String;
+                  return QrGenerationScreen(courseId: courseId);
+                },
               )
             ]
           ),

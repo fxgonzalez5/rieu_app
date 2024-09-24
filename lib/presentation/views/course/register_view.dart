@@ -5,8 +5,9 @@ import 'package:rieu/config/theme/responsive.dart';
 import 'package:rieu/presentation/providers/providers.dart';
 
 class RegisterView extends StatelessWidget {
+  final String courseId;
 
-  const RegisterView({super.key});
+  const RegisterView({super.key, required this.courseId});
 
   @override
   Widget build(BuildContext context) {
@@ -21,11 +22,18 @@ class RegisterView extends StatelessWidget {
         children: [
           Text('Instrucciones:', style: texts.bodyLarge!.copyWith(fontWeight: FontWeight.bold)),
           if (user.isAdmin)
-            buildListTile(context, 
-              title: 'Registro de asistencia',
-              subtitle: 'Genera el código QR para que los estudiantes puedan registrar su asistencia.',
-              onPressed: () {}, // TODO: Navegar a la pantalla que genera el QR
-            )
+            ...[
+              buildListTile(context, icon: Icons.qr_code_rounded,
+                title: 'Registro de asistencia',
+                subtitle: 'Genera el código QR para que los usuarios puedan registrar su asistencia.',
+                onPressed: () => context.push('${GoRouterState.of(context).matchedLocation}/qr-generation', extra: courseId),
+              ),
+              buildListTile(context,
+                title: 'Registro de comida',
+                subtitle: 'Escanea el código QR del usuario para registrar que ha recibido su café.',
+                onPressed: () => context.push('${GoRouterState.of(context).matchedLocation}/qr-scan/coffe'),
+              ),
+            ]
           else 
             ...[
               buildListTile(context, 
@@ -44,13 +52,10 @@ class RegisterView extends StatelessWidget {
                   context.push('${GoRouterState.of(context).matchedLocation}/qr-scan/output', extra: GoRouterState.of(context).matchedLocation);
                 },
               ),
-              buildListTile(context, 
+              buildListTile(context, icon: Icons.qr_code_rounded,
                 title: '3. Registro de comida',
-                subtitle: 'Escanea el código QR designado para el registro de comida en el tiempo establecido.',
-                onPressed: () {
-                  //TODO: Desactivar el botón cuando el estudiante realice el registro correctamente
-                  context.push('${GoRouterState.of(context).matchedLocation}/qr-scan/coffe', extra: GoRouterState.of(context).matchedLocation);
-                },
+                subtitle: 'Genera el código QR para que puedas registrar que has recibido tu café.',
+                onPressed: () => context.push('${GoRouterState.of(context).matchedLocation}/qr-generation', extra: courseId),
               )
             ]
         ],
@@ -58,11 +63,10 @@ class RegisterView extends StatelessWidget {
     );
   }
 
-  ListTile buildListTile(BuildContext context, {required String title, required String subtitle, VoidCallback? onPressed}) {
+  ListTile buildListTile(BuildContext context, {IconData icon = Icons.qr_code_scanner_rounded, required String title, required String subtitle, VoidCallback? onPressed}) {
     final responsive = Responsive(context);
     final colors = Theme.of(context).colorScheme;
     final texts = Theme.of(context).textTheme;
-    final user = context.read<UserProvider>().user;
 
     return ListTile(
       contentPadding: EdgeInsets.zero,
@@ -70,9 +74,7 @@ class RegisterView extends StatelessWidget {
       title: Text(title, style: texts.bodyLarge!.copyWith(fontWeight: FontWeight.w600)),
       subtitle: Text(subtitle),
       trailing: IconButton(
-        icon: Icon(user.isAdmin
-          ? Icons.qr_code_rounded
-          : Icons.qr_code_scanner_rounded, 
+        icon: Icon(icon, 
           size: responsive.ip(3),
         ),
         onPressed: onPressed,

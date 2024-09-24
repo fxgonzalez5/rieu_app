@@ -262,7 +262,7 @@ class _ContentTabsState extends State<_ContentTabs> with TickerProviderStateMixi
         course: widget.course,
         isActive: widget.status != CourseStatus.accepted
       ),
-      const RegisterView(),
+      RegisterView(courseId: widget.course.id),
       HistoryView(courseId: widget.course.id),
     ];
   }

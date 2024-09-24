@@ -27,11 +27,10 @@ class RegisterScreen extends StatelessWidget {
           if (authProvider.state.alert != null) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               final alert =  authProvider.state.alert!;
-              showAlert(context, alert.title, alert.message,
-                onContinue: () {
-                  Navigator.of(context).pop();
-                  context.go('/process-completed', extra: {'title': '¡Te has registrado con éxito!', 'nextRoute': '/home'});
-                }
+              showAlert(context,
+                alert.title,
+                alert.message,
+                onContinue: () => context.go('/process-completed', extra: {'title': '¡Te has registrado con éxito!', 'nextRoute': '/home'}),
               );
             });
           }

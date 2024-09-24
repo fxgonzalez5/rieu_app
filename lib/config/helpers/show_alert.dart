@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:rieu/config/theme/responsive.dart';
 
-void showAlert(BuildContext context, String title, message, {Function()? onContinue}) {
+void showAlert(BuildContext context, String title, String message, {Function()? onContinue}) {
   showDialog(
     barrierDismissible: false,
     context: context,
@@ -14,7 +14,10 @@ void showAlert(BuildContext context, String title, message, {Function()? onConti
           style: ButtonStyle(
             foregroundColor: WidgetStatePropertyAll(Theme.of(context).colorScheme.secondary),
           ),
-          onPressed: onContinue,
+          onPressed: () {
+            Navigator.of(context).pop();
+            onContinue?.call();
+          },
           child: const Text('Continuar'),
         ),
       ],

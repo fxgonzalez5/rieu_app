@@ -66,7 +66,6 @@ class MainApp extends StatelessWidget {
           },
         ),
         ChangeNotifierProvider(create: (context) => CourseProvider(getCourse: coursesRepository.getCourseById)),
-        ChangeNotifierProvider(create: (context) => QrProvider()),
         ChangeNotifierProvider(
           create: (context) => OrganizationsProvider(organizationsRepository: context.read<OrganizationsProfilesRepository>()),
           lazy: false,
