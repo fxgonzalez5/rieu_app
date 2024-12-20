@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:rieu/domain/datasources/courses_datasource.dart';
 import 'package:rieu/domain/entities/course.dart';
+import 'package:rieu/domain/entities/participant.dart';
 import 'package:rieu/infrastructure/mappers/mappers.dart';
 import 'package:rieu/infrastructure/models/models.dart';
 
@@ -25,11 +26,36 @@ class FirebaseDataSource implements CoursesDatasource {
       }
 
       final querySnapshot = await query.get();
-      final courses = querySnapshot.docs.map((course) => CourseMapper.courseFirebaseToEntity(course.data())).toList();
+      
+      final List<Course> courses = [];
+      for (final doc in querySnapshot.docs) {
+        final participants = await getParticipantsForCourse(doc.id);
+        final course = CourseMapper.courseFirebaseToEntity(doc.data(), participants);
+        courses.add(course);
+      }
 
       return courses;
     } catch (e) {
       throw Exception('Error al obtener los cursos: $e');
+    }
+  }
+
+  @override
+  Future<List<Map<String, Participant>>> getParticipantsForCourse(String courseId) async {
+    try {
+      final participantsFirebase = await _db.collection('courses').doc(courseId).collection('participants').get();
+
+      if (participantsFirebase.docs.isEmpty) return [];
+
+      final List<Map<String, Participant>> participants = [];
+      for (final doc in participantsFirebase.docs) {
+        final participant = ParticipantMapper.participantToEntity(ParticipantFirebase.fromMap(doc.data()));
+        participants.add({doc.id: participant});
+      }
+
+      return participants;
+    } catch (e) {
+      throw Exception('Error al obtener los participantes para el curso $courseId: $e');
     }
   }
 
@@ -51,7 +77,13 @@ class FirebaseDataSource implements CoursesDatasource {
       }
 
       final querySnapshot = await query.get();
-      final courses = querySnapshot.docs.map((course) => CourseMapper.courseFirebaseToEntity(course.data())).toList();
+
+      final List<Course> courses = [];
+      for (final doc in querySnapshot.docs) {
+        final participants = await getParticipantsForCourse(doc.id);
+        final course = CourseMapper.courseFirebaseToEntity(doc.data(), participants);
+        courses.add(course);
+      }
 
       return courses;
     } catch (e) {
@@ -76,9 +108,14 @@ class FirebaseDataSource implements CoursesDatasource {
         query = coursesFirebase.where('courseName', isGreaterThanOrEqualTo: term).orderBy('courseName').startAfterDocument(lastCourse).limit(limit);
       }
       
-
       final querySnapshot = await query.get();
-      final courses = querySnapshot.docs.map((course) => CourseMapper.courseFirebaseToEntity(course.data())).toList();
+      
+      final List<Course> courses = [];
+      for (final doc in querySnapshot.docs) {
+        final participants = await getParticipantsForCourse(doc.id);
+        final course = CourseMapper.courseFirebaseToEntity(doc.data(), participants);
+        courses.add(course);
+      }
 
       return courses;
     } catch (e) {
@@ -87,7 +124,7 @@ class FirebaseDataSource implements CoursesDatasource {
   }
 
   @override
-  Future<Course> getCourseById(String id) {
+  Future<Course> getCourseById(String id) async {
     try {
       final courseFirebase = _db.collection('courses').doc(id)
         .withConverter(
@@ -95,12 +132,12 @@ class FirebaseDataSource implements CoursesDatasource {
           toFirestore: (model, _) => model.toMap(),
         );
 
-      final course = courseFirebase.get().then((course) => CourseMapper.courseFirebaseToEntity(course.data()!));
+      final course = await courseFirebase.get();
+      final participants = await getParticipantsForCourse(id);
 
-      return course;
+      return CourseMapper.courseFirebaseToEntity(course.data()!, participants);
     } catch (e) {
       throw Exception('Error al obtener el curso: $e');
     }
   }
-
 }

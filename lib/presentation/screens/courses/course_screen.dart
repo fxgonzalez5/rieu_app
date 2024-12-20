@@ -25,13 +25,10 @@ class _CourseScreenState extends State<CourseScreen> {
   void initState() {
     super.initState();
     final courseProvider = context.read<CourseProvider>();
-    
-    courseProvider.loadCourse(widget.courseId).whenComplete(
-      () => courseProvider.fetchCourseStatus(
-        user: context.read<UserProvider>().user,
-        courseId: widget.courseId,
-      ),
-    );
+    courseProvider.loadCourse(widget.courseId).whenComplete(() {
+        final user = context.read<UserProvider>().user;
+        courseProvider.fetchCourseStatus(courseId: widget.courseId, userId: user.id, isAdmin: user.isAdmin);
+    });
   }
 
   @override
@@ -97,7 +94,7 @@ class _CourseBody extends StatelessWidget {
     final responsive = Responsive(context);
     final texts = Theme.of(context).textTheme;
     final user = context.watch<UserProvider>().user;
-    final status = context.watch<CourseProvider>().coursesStatusMap[course.id]!;
+    final courseStatus = context.watch<CourseProvider>().coursesStatusMap[course.id]!;
 
     return Stack(
       alignment: Alignment.bottomCenter,
@@ -132,44 +129,34 @@ class _CourseBody extends StatelessWidget {
                   ),
                 ),
               ),
-              _OverviewSection(course, status),
-              Expanded(
-                child: _ContentTabs(
-                  user: user,
-                  course: course,
-                  status: status,
-                ),
-              ),
+              _OverviewSection(course, courseStatus.status),
+              Expanded(child: _ContentTabs(course, courseStatus.status)),
             ],
           )
         ),
 
-        if (status != CourseStatus.accepted)
-          _FloatingBox(
-            status: status,
-            user: user,
-          ),
+        if (courseStatus.status != CourseStatus.accepted)
+          _FloatingBox(courseStatus, user),
       ],
     );
   }
 }
 
 class _FloatingBox extends StatelessWidget {
-  final CourseStatus status;
+  final CourseStatusData courseStatus;
   final UserEntity user;
   
-  const _FloatingBox({
-    required this.status,
-    required this.user,
-  });
+  const _FloatingBox(
+    this.courseStatus,
+    this.user,
+  );
 
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
-    final courseStatusData = context.read<CourseProvider>().getCourseStatusData(status, user.isAdmin);
 
     Color? colorButton() {
-      switch (status) {
+      switch (courseStatus.status) {
         case CourseStatus.available:
           return Theme.of(context).colorScheme.primary;
         case CourseStatus.pending:
@@ -197,22 +184,22 @@ class _FloatingBox extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Text(courseStatusData.text, style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text(courseStatus.text, style: const TextStyle(fontWeight: FontWeight.bold)),
           const Spacer(),
-          if (status != CourseStatus.unavailable)
+          if (courseStatus.status != CourseStatus.unavailable)
             FilledButton(
               style: ButtonStyle(
                 padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: responsive.wp(7.5), vertical: responsive.hp(1.5))),
                 backgroundColor: WidgetStatePropertyAll(colorButton()),
                 foregroundColor: const WidgetStatePropertyAll(Colors.white),
               ),
-              onPressed: status != CourseStatus.available 
+              onPressed: courseStatus.status == CourseStatus.unavailable 
                 ? null 
                 : () {
                   // TODO: Implementar la lógica para registrar al usuario en el curso
                   // TODO: Implementar la logica para registrar al administrador en el curso, si tiene permitida dicha categoría
                 },
-              child: Text(courseStatusData.textButton),
+              child: Text(courseStatus.textButton),
             ),
         ],
       ),
@@ -221,15 +208,13 @@ class _FloatingBox extends StatelessWidget {
 }
 
 class _ContentTabs extends StatefulWidget {
-  final UserEntity user;
   final Course course;
   final CourseStatus status;
   
-  const _ContentTabs({
-    required this.user,
-    required this.course,
-    required this.status,
-  });
+  const _ContentTabs(
+    this.course,
+    this.status,
+  );
 
   @override
   State<_ContentTabs> createState() => _ContentTabsState();
@@ -353,7 +338,7 @@ class _OverviewSection extends StatelessWidget {
                   iconSize: responsive.wp(8),
                   icon: const Icon(Icons.star_outlined),
                   onPressed: () => showRatingDialog(context,
-                    initialRating: course.registeredUsers[user.id],
+                    initialRating: course.getParticipant(user.id)!.rating,
                     onRatingUpdate: (rating) {
                       // TODO: Implementar la actualización de la calificación
                     }

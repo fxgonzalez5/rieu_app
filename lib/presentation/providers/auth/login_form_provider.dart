@@ -24,7 +24,7 @@ class LoginFormProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> onFormSubmit() async {
+  void onFormSubmit() async {
     _touchEveryField();
     if (!isValid) return;
 

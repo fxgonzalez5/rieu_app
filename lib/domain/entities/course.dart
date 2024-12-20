@@ -1,3 +1,5 @@
+import 'package:rieu/domain/entities/entities.dart';
+
 class Course {
   final String id;
   final String posterPath;
@@ -18,8 +20,8 @@ class Course {
   final DateTime creationDate;
   final DateTime applicationDeadline;
   final bool authorization;
-  final Map<String, double?> registeredUsers;
-  final int totalAuthorizedUsers;
+  final List<Map<String, Participant>> participants;
+  final int totalAuthorizedParticipants;
 
   Course({
     required this.id,
@@ -41,10 +43,16 @@ class Course {
     required this.creationDate,
     required this.applicationDeadline,
     required this.authorization,
-    required this.registeredUsers,
-    required this.totalAuthorizedUsers,
+    required this.participants,
+    required this.totalAuthorizedParticipants,
   });
+
+  Participant? getParticipant(String userId) {
+    final participant = participants.firstWhere((element) => element.keys.first == userId, orElse: () => {});
+    return participant[userId];
+  }
 }
+
 
 class Instructor {
   final String photoPath;

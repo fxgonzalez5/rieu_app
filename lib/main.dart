@@ -12,7 +12,7 @@ import 'package:rieu/infrastructure/repositories/repositories.dart';
 import 'package:rieu/presentation/providers/providers.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();  
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -48,21 +48,23 @@ class MainApp extends StatelessWidget {
       providers: [
         ChangeNotifierProxyProvider<AuthProvider, UserProvider>(
           // Se sobreentiende que el usuario ya está autenticado y se puede acceder a su información
-          create: (context) => UserProvider(userRepository: UserRepositoryImpl(), user: context.read<AuthProvider>().state.user!),
+          create: (context) => UserProvider(userRepository: UserRepositoryImpl(coursesRepository: coursesRepository), user: context.read<AuthProvider>().state.user!),
           update: (_, authProvider, previous) {
             if (previous != null && authProvider.state.user! != previous.user) {
               previous.user = authProvider.state.user!;
+              previous.reloadCourses();
             }
-            return previous ?? UserProvider(userRepository: UserRepositoryImpl(), user: authProvider.state.user!);
+            return previous ?? UserProvider(userRepository: UserRepositoryImpl(coursesRepository: coursesRepository), user: authProvider.state.user!);
           },
         ),
         ChangeNotifierProxyProvider<UserProvider, CoursesProvider>(
-          create: (context) => CoursesProvider(coursesRepository: coursesRepository),
+          create: (context) => CoursesProvider(coursesRepository: coursesRepository, userCourses: context.read<UserProvider>().courses),
           update: (_, userProvider, previous) {
-            if (previous != null && userProvider.user.courses.keys.length != previous.userCoursesIds.length) {
-              previous.loadUserCourses(userProvider.user.courses.keys.toList());
+            //* Si existe alguna inconsistencia al actualizar los cursos del usuario, se debe comparar con el listado de _backupCourses
+            if (previous != null && userProvider.courses != previous.userCourses) {
+              previous.loadUserCourses(userProvider.courses);
             }
-            return previous ?? CoursesProvider(coursesRepository: coursesRepository);
+            return previous ?? CoursesProvider(coursesRepository: coursesRepository, userCourses: userProvider.courses);
           },
         ),
         ChangeNotifierProvider(create: (context) => CourseProvider(getCourse: coursesRepository.getCourseById)),

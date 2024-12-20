@@ -17,10 +17,11 @@ class HistoryView extends StatelessWidget {
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
     final texts = Theme.of(context).textTheme;
-    final courseProvider = context.read<CourseProvider>();
+    final course = context.read<CourseProvider>().coursesMap[courseId]!;
     final userProvider = context.read<UserProvider>();
+    final participant = course.getParticipant(userProvider.user.id)!;
 
-    if (courseProvider.coursesMap[courseId]!.totalAuthorizedUsers > 0) {
+    if (course.totalAuthorizedParticipants > 0) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -30,8 +31,9 @@ class HistoryView extends StatelessWidget {
           ),
           _ExpandableList(
             isAdmin: userProvider.user.isAdmin,
-            attendanceData: userProvider.user.courses[courseId]!,
-            totalAuthorizedUsers: courseProvider.coursesMap[courseId]!.totalAuthorizedUsers,
+            attendanceData: participant.attendanceData!,
+            endDate: course.endDate,
+            totalAuthorizedUsers: course.totalAuthorizedParticipants,
           ),
         ],
       );
@@ -46,11 +48,13 @@ class HistoryView extends StatelessWidget {
 class _ExpandableList extends StatefulWidget {
   final bool isAdmin;
   final List<AttendanceData> attendanceData;
+  final DateTime endDate;
   final int totalAuthorizedUsers;
 
   const _ExpandableList({
     this.isAdmin = false,
     required this.attendanceData,
+    required this.endDate,
     required this.totalAuthorizedUsers,
   });
 
@@ -126,9 +130,7 @@ class _ExpandableListState extends State<_ExpandableList> {
                   decoration: buildDecorationCollapsed(context, isExpanded, isFirst, isLast),
                   title: attendanceRecord.dateDuration,
                   titleStyle: textStyle,
-                  trailing: widget.isAdmin
-                    ? Text('${attendanceRecord.totalAttendance}/${widget.totalAuthorizedUsers}', style: textStyle)
-                    : Text('${attendanceRecord.totalAttendance}/${attendanceRecord.records.length}', style: textStyle),
+                  trailing: (widget.isAdmin) ? Text('${widget.totalAuthorizedUsers}') : const SizedBox(),
                   onExpansionChanged: (isExpanded) => setState(() {
                     for (int i = 0; i < controllers.length; i++) {
                       controllers[i].expanded = (i == index) ? isExpanded : false;
@@ -142,7 +144,13 @@ class _ExpandableListState extends State<_ExpandableList> {
                   border: const TableBorder.symmetric(inside: BorderSide()),
                   children: [
                     buildTableHeader(context),
-                    ...attendanceRecord.records.map((record) => buildTableBody(context, record: record)),
+                    ...attendanceRecord.records.map((record) {
+                      final newRecord = record.copyWith(
+                        input: record.input == 'No Registrada' ? '' : record.input,
+                        output: record.output == 'No Registrada' ? '' : record.output,
+                      );
+                      return buildTableBody(context, record: (DateTime.now().isAfter(widget.endDate)) ? record : newRecord);
+                    }),
                   ],
                 ),
               ),

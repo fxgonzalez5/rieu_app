@@ -1,30 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:rieu/config/helpers/helpers.dart';
 import 'package:rieu/config/theme/responsive.dart';
 import 'package:rieu/presentation/providers/providers.dart';
 import 'package:rieu/presentation/widgets/widgets.dart';
 
-class CoursesView extends StatelessWidget {
+class CoursesView extends StatefulWidget {
   const CoursesView({super.key});
+
+  @override
+  State<CoursesView> createState() => _CoursesViewState();
+}
+
+class _CoursesViewState extends State<CoursesView> {
+  final scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    final userProvider = context.read<UserProvider>();
+    scrollController.addListener(() {
+      if ((scrollController.position.pixels + 250) >= scrollController.position.maxScrollExtent) {
+        userProvider.loadNextPage();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
     final coursesProvider = context.watch<CoursesProvider>();
-
-    int calculateCourseProgress(DateTime startDate, DateTime endDate) {
-      final currentDate = DateTime.now();
-      if (currentDate.isBefore(startDate)) return 0;
-      if (currentDate.isAfter(endDate)) return 100;
-
-      final totalDays = endDate.difference(startDate).inDays;
-      final daysPassed = currentDate.difference(startDate).inDays;
-
-      if (daysPassed <= 0) return 0;
-
-      final progressPercentage = ((daysPassed / totalDays) * 100).floor();
-      return progressPercentage;
-    }
 
     if (coursesProvider.userCourses.isEmpty && coursesProvider.hasFiltered) {
       return const Center(

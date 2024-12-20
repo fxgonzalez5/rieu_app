@@ -68,9 +68,7 @@ class BubbleModel {
 }
 
 class _CustomAnimate extends StatefulWidget {
-  const _CustomAnimate({
-    super.key,
-  });
+  const _CustomAnimate();
 
   @override
   State<_CustomAnimate> createState() => _CustomAnimateState();

@@ -24,9 +24,7 @@ class UserMapper {
     roles: List<String>.from(json['roles'].map((role) => role)),
     institution: json['institution'],
     city: json['city'],
-    courses: Map.from(json["courses"]).map(
-      (k, v) => MapEntry<String, List<AttendanceData>?>(k, v == null ? null : List<AttendanceData>.from(v!.map((x) => AttendanceData.fromMap(x))))
-    ),
+    courses: List<String>.from(json['courses'].map((course) => course)),
     totalCourses: json['totalCourses'],
     mostActiveCourse: json['mostActiveCourse'],
     totalActiveCourses: json['totalActiveCourses'],

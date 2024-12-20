@@ -30,7 +30,7 @@ class RegisterScreen extends StatelessWidget {
               showAlert(context,
                 alert.title,
                 alert.message,
-                onContinue: () => context.go('/process-completed', extra: {'title': '¡Te has registrado con éxito!', 'nextRoute': '/home'}),
+                onContinue: () => context.go('/process-completed', extra: {'title': '¡Te has registrado con éxito!', 'nextRoute': '/home/0'}),
               );
             });
           }
@@ -146,7 +146,7 @@ class _FormContainer extends StatelessWidget {
             child: FilledButton(
               onPressed: registerFormProvider.isPosting
                 ? null
-                : () {
+                : () async {
                   FocusScope.of(context).unfocus();
                   registerFormProvider.onFormSubmit();
                 },

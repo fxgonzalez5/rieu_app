@@ -100,7 +100,7 @@ class _FormContainer extends StatelessWidget {
             child: FilledButton(
               onPressed: loginFormProvider.isPosting
                 ? null
-                : () {
+                : () async {
                   FocusScope.of(context).unfocus();
                   loginFormProvider.onFormSubmit();
                 },

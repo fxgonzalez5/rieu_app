@@ -3,146 +3,145 @@ import 'package:rieu/domain/entities/entities.dart';
 import 'package:rieu/domain/repositories/courses_repository.dart';
 
 class CoursesProvider extends ChangeNotifier {
-  final List<String> categories = ['Formación', 'Todo', 'Innovación', 'Encuentros Acad', 'Café Científico', 'Diálogos Éticos', 'Congresos', 'Otros'];
-  String _currentCategory = 'Todo';
   final CoursesRepository coursesRepository;
-  final int limit = 5;
-  String lastCourseId = '';
-  bool isLoading = false, isLastPage = false, _hasSearch = false, hasFiltered = false;
+  final List<Course> userCourses;
   final TextEditingController searchController = TextEditingController();
-  final List<Course> courses = [], _backupCourses = [], userCourses = [], _backupUserCourses = [];
+  final List<String> categories = ['Formación', 'Todo', 'Innovación', 'Encuentros Acad', 'Café Científico', 'Diálogos Éticos', 'Congresos', 'Otros'];
+  final List<Course> courses = [], _backupCourses = [], _backupUserCourses = [];
+  final int limit = 5;
+  String _currentCategory = 'Todo', _lastCourseId = '';
+  bool isLoading = false, _isLastPage = false, _hasSearch = false, hasFiltered = false;
 
-  CoursesProvider({required this.coursesRepository}) {
+  CoursesProvider({required this.coursesRepository, required this.userCourses}) {
     loadNextPage();
   }
 
   String get currentCategory => _currentCategory;
 
-  List<String> get userCoursesIds => _backupUserCourses.map((userCourse) => userCourse.id).toList();
-
-  void _resetPagination() {
-    courses.clear();    
-    lastCourseId = '';  
-    isLastPage = false;
+  void _updateList(List<Course> currentList, List<Course> newList) {
+    currentList.clear();
+    currentList.addAll(newList);
   }
 
-  Future<void> pageChanged(int pageIndex) async {
-    await Future.delayed(const Duration(milliseconds: 150));
-    _currentCategory = 'Todo';
+  void _updateUserCourses(List<Course> newUserCourses) {
+    userCourses.clear();
+    userCourses.addAll(newUserCourses);
+    _backupUserCourses.clear();
+    _backupUserCourses.addAll(newUserCourses);
+  }
+
+  void _resetSearch() {
     searchController.clear();
     _hasSearch = false;
-    hasFiltered = false;
-    if (pageIndex == 1) {
-      _filterUserCourses();
-      return;
-    }
+  }
 
-    _resetPagination();
-    courses.addAll(_backupCourses);
-    notifyListeners();
+  void _resetCategory() {
+    _currentCategory = 'Todo';
+    hasFiltered = false;
+  }
+  
+  void _resetPagination() {
+    courses.clear();    
+    _lastCourseId = '';  
+    _isLastPage = false;
   }
 
   Future<List<Course>> _loadCourses() async {
-    if (_hasSearch) return coursesRepository.getCourseBySearch(searchController.text, limit: limit, lastCourseId: lastCourseId);
-    if (_currentCategory == 'Todo') {
-      hasFiltered = false;
-      final newCourses = await coursesRepository.getCourses(limit: limit, lastCourseId: lastCourseId);
-      _backupCourses.clear();
-      _backupCourses.addAll(newCourses);
-      return newCourses;
-    }
-    return coursesRepository.getCourseByCategory(_currentCategory, limit: limit, lastCourseId: lastCourseId);
+    if (_hasSearch) return coursesRepository.getCourseBySearch(searchController.text, limit: limit, lastCourseId: _lastCourseId);
+    if (hasFiltered) return coursesRepository.getCourseByCategory(_currentCategory, limit: limit, lastCourseId: _lastCourseId);
+    
+    final newCourses = await coursesRepository.getCourses(limit: limit, lastCourseId: _lastCourseId);
+    _updateList(_backupCourses, newCourses);
+    return newCourses;
   }
 
   Future<void> loadNextPage() async {
-    if (isLoading || isLastPage) return;
+    if (isLoading || _isLastPage) return;
 
     isLoading = true;
     notifyListeners();
 
     final newCourses = await _loadCourses();
-    if (newCourses.length < limit) isLastPage = true;
+    if (newCourses.length < limit) _isLastPage = true;
 
     courses.addAll(newCourses);
-    if (newCourses.isNotEmpty) lastCourseId = newCourses.last.id;
+    if (newCourses.isNotEmpty) _lastCourseId = newCourses.last.id;
 
     isLoading = false;
     notifyListeners();
   }
 
-  Future<void> loadUserCourses(List<String> userCoursesIds) async {
-    userCourses.clear();
-    _backupUserCourses.clear();
-
-    for (final courseId in userCoursesIds) {
-      final userCourse = await coursesRepository.getCourseById(courseId);
-      userCourses.add(userCourse);
-    }
-    _backupUserCourses.addAll(userCourses);
+  void loadUserCourses(List<Course> newUserCourses) {
+    _updateUserCourses(newUserCourses);
+    
+    if (_hasSearch) return _searchInUserCourses();
+    if (hasFiltered) return _filterUserCoursesByCategory();
 
     notifyListeners();
   }
 
+  Future<void> pageChanged(int pageIndex) async {
+    await Future.delayed(const Duration(milliseconds: 150));
+    _resetSearch();
+    _resetCategory();
+    _updateList(courses, _backupCourses);
+    notifyListeners();
+  }
+
   void toggleCourseSearch([int pageIndex = 0])  {
+    if (searchController.text.isEmpty && _hasSearch) {
+      _resetSearch();
+      _updateList(courses, _backupCourses);
+      notifyListeners();
+      return;
+    }
     if (searchController.text.isEmpty) return; 
 
     _hasSearch = true;
-    hasFiltered = false;
-    _currentCategory = 'Todo';
+    _resetCategory();
 
-    if (pageIndex == 1) {
-      _searchInUserCourses();
-      return;
-    }
+    if (pageIndex == 1) return _searchInUserCourses();
 
     _resetPagination();
     loadNextPage();
   }
 
   void _searchInUserCourses() {
-    final coursesFound = _backupUserCourses.where((userCourse) {
-      if (userCourse.name.toLowerCase().contains(searchController.text.toLowerCase())
-        || userCourse.instructors.any(
-          (instructor) => instructor.name.toLowerCase().contains(searchController.text.toLowerCase())
-        )
-      ) return true;
-      return false;        
-    });
+    final term = searchController.text.toLowerCase().trim();
 
-    userCourses.clear();
-    userCourses.addAll(coursesFound);
+    final coursesFound = _backupUserCourses.where((userCourse) => userCourse.name.toLowerCase().contains(term));
+    final instructorsFound = _backupUserCourses.where((userCourse) => userCourse.instructors.any(
+      (instructor) => instructor.name.toLowerCase().contains(term)
+    ));
+
+    final uniqueCourses = {...coursesFound, ...instructorsFound}.toList();
+
+    _updateList(userCourses, uniqueCourses);
     notifyListeners();
   }
 
   void fetchCoursesByCategory(String category, [int pageIndex = 0])  {
     if (_currentCategory == category && !_hasSearch) return;
 
-    hasFiltered = true;
-    _currentCategory = category;
-    searchController.clear();
-    _hasSearch = false;
+    if (_currentCategory != category) _currentCategory = category;
+    hasFiltered = (category != 'Todo');
+    _resetSearch();
 
-    if (pageIndex == 1) {
-      _filterUserCourses();
-      return;
-    }
+    if (pageIndex == 1) return _filterUserCoursesByCategory();
 
     _resetPagination();
     loadNextPage();
   }
 
-  void _filterUserCourses() {
-    if (_currentCategory == 'Todo') {
-      hasFiltered = false;
-      userCourses.clear();
-      userCourses.addAll(_backupUserCourses);
+  void _filterUserCoursesByCategory() {
+    if (!hasFiltered) {
+      _updateList(userCourses, _backupUserCourses);
       notifyListeners();
       return;
     }
 
-    final coursesFound = _backupUserCourses.where((userCourse) => userCourse.category == _currentCategory);
-    userCourses.clear();
-    userCourses.addAll(coursesFound);
+    final coursesFound = _backupUserCourses.where((userCourse) => userCourse.category == _currentCategory).toList();
+    _updateList(userCourses, coursesFound);
     notifyListeners();
   }
 }

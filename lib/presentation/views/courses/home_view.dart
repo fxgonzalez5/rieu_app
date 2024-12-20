@@ -20,7 +20,7 @@ class _HomeViewState extends State<HomeView> {
     final coursesProvider = context.read<CoursesProvider>();
     scrollController.addListener(() {
       if ((scrollController.position.pixels + 250) >= scrollController.position.maxScrollExtent) {
-        if (!coursesProvider.isLastPage) coursesProvider.loadNextPage();
+        coursesProvider.loadNextPage();
       }
     });
   }

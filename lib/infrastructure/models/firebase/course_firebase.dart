@@ -18,9 +18,8 @@ class CourseFirebase {
   final DateTime creationDate;
   final DateTime applicationDeadline;
   final bool authorization;
-  final List<String> registeredAdministrators;
-  final Map<String, double?> registeredUsers;
-  final int totalAuthorizedUsers;
+  // final List<String> registeredAdministrators;
+  final int totalAuthorizedParticipants;
 
   CourseFirebase({
     required this.id,
@@ -42,9 +41,8 @@ class CourseFirebase {
     required this.creationDate,
     required this.applicationDeadline,
     required this.authorization,
-    required this.registeredAdministrators,
-    required this.registeredUsers,
-    required this.totalAuthorizedUsers,
+    // required this.registeredAdministrators,
+    required this.totalAuthorizedParticipants,
   });
 
   factory CourseFirebase.fromMap(Map<String, dynamic> json) => CourseFirebase(
@@ -67,9 +65,8 @@ class CourseFirebase {
     creationDate: DateTime.parse(json["creationDate"]),
     applicationDeadline: DateTime.parse(json["applicationDeadline"]),
     authorization: json["authorization"],
-    registeredAdministrators: List<String>.from(json["registeredAdministrators"].map((x) => x)),
-    registeredUsers: Map<String, double?>.from(json["registeredUsers"]).map((k, v) => MapEntry<String, double?>(k, v)),
-    totalAuthorizedUsers: json["totalAuthorizedUsers"],
+    // registeredAdministrators: List<String>.from(json["registeredAdministrators"].map((x) => x)),
+    totalAuthorizedParticipants: json["totalAuthorizedParticipants"],
   );
 
   Map<String, dynamic> toMap() => {
@@ -92,9 +89,8 @@ class CourseFirebase {
     "creationDate": creationDate.toIso8601String(),
     "applicationDeadline": applicationDeadline.toIso8601String(),
     "authorization": authorization,
-    "registeredAdministrators": List<dynamic>.from(registeredAdministrators.map((x) => x)),
-    "registeredUsers": Map<String, double?>.from(registeredUsers).map((k, v) => MapEntry<String, double?>(k, v)),
-    "totalAuthorizedUsers": totalAuthorizedUsers,
+    // "registeredAdministrators": List<dynamic>.from(registeredAdministrators.map((x) => x)),
+    "totalAuthorizedParticipants": totalAuthorizedParticipants,
   };
 }
 

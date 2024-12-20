@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/widgets.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 import 'package:rieu/domain/entities/entities.dart';
 
 enum CourseStatus {available, unavailable, pending, canceled, accepted}
@@ -27,13 +27,14 @@ const List<CourseStatusData> _administratorCourseStatuses = [
 const List<CourseStatusData> _courseStatusList = [
   CourseStatusData(status: CourseStatus.available, text: 'Participa en el curso', textButton: 'Inscribirme'),
   CourseStatusData(status: CourseStatus.unavailable, text: 'Tiempo de inscripción finalizado', textButton: ''),
+  CourseStatusData(status: CourseStatus.accepted, text: '', textButton: ''),
   CourseStatusData(status: CourseStatus.pending, text: 'Tu solicitud se encuentra', textButton: 'En revisión'),
   CourseStatusData(status: CourseStatus.canceled, text: 'Tu solicitud ha sido', textButton: 'Rechazada'),
 ];
 
 class CourseProvider extends ChangeNotifier {
   final Map<String, Course> _coursesMap = {};
-  final Map<String, CourseStatus> _coursesStatusMap = {};
+  final Map<String, CourseStatusData> _coursesStatusMap = {};
   final GetCourseCallback getCourse;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   String _errorMessage = '';
@@ -41,11 +42,7 @@ class CourseProvider extends ChangeNotifier {
   CourseProvider({required this.getCourse});
 
   Map<String, Course> get coursesMap => _coursesMap;
-  Map<String, CourseStatus> get coursesStatusMap => _coursesStatusMap;
-  set coursesStatusMap(Map<String, CourseStatus> value) {
-    _coursesStatusMap.addAll(value);
-    notifyListeners();
-  }
+  Map<String, CourseStatusData> get coursesStatusMap => _coursesStatusMap;
 
   String get errorMessage => _errorMessage;
   set errorMessage(String value) {
@@ -65,33 +62,34 @@ class CourseProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void fetchCourseStatus({required UserEntity user, required String courseId}) {
-    if (!user.courses.containsKey(courseId)) {
-      if (DateTime.now().isAfter(_coursesMap[courseId]!.applicationDeadline)) {
-        _coursesStatusMap[courseId] = CourseStatus.unavailable;
-      } else {
-        _coursesStatusMap[courseId] = CourseStatus.available;
-      }
-    } else {
-      final attendanceRecord = user.courses[courseId];
+  void fetchCourseStatus({required String courseId, required String userId, required bool isAdmin}) {
+    final course = _coursesMap[courseId]!;
 
-      if (attendanceRecord == null) {
-        _coursesStatusMap[courseId] = CourseStatus.canceled;
-      } else {
-        if (attendanceRecord.isEmpty) {
-          _coursesStatusMap[courseId] = CourseStatus.pending;
+    if (isAdmin) {
+      // TODO: Implementar lógica para administradores
+    } else {
+      final participant = course.getParticipant(userId);
+  
+      if (participant == null) {
+        if (DateTime.now().isAfter(course.applicationDeadline)) {
+          _coursesStatusMap[courseId] = _courseStatusList.firstWhere((element) => element.status == CourseStatus.unavailable);
         } else {
-          _coursesStatusMap[courseId] = CourseStatus.accepted;
+          _coursesStatusMap[courseId] = _courseStatusList.firstWhere((element) => element.status == CourseStatus.available);
+        }
+      } else {
+        switch (participant.status) {
+          case ParticipantStatus.accepted:
+            _coursesStatusMap[courseId] = _courseStatusList.firstWhere((element) => element.status == CourseStatus.accepted);
+            break;
+          case ParticipantStatus.pending:
+            _coursesStatusMap[courseId] = _courseStatusList.firstWhere((element) => element.status == CourseStatus.pending);
+            break;
+          case ParticipantStatus.rejected:
+            _coursesStatusMap[courseId] = _courseStatusList.firstWhere((element) => element.status == CourseStatus.canceled);
+            break;
         }
       }
     }
-  }
-
-  CourseStatusData getCourseStatusData(CourseStatus status, [bool isAdmin = false]) {
-    if (isAdmin) {
-      return _administratorCourseStatuses.firstWhere((element) => element.status == status);
-    } 
-    return _courseStatusList.firstWhere((element) => element.status == status);
   }
 
   Stream<bool> onQRViewCreated(QRViewController controller, String qrType) async* {

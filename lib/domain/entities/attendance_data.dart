@@ -1,36 +1,28 @@
 class AttendanceData {
   final String dateDuration;
   final List<Record> records;
-  final int totalAttendance;
 
   AttendanceData({
     required this.dateDuration,
     required this.records,
-    required this.totalAttendance,
   });
 
   AttendanceData copyWith({
     String? dateDuration,
     List<Record>? records,
-    int? totalAttendance,
   }) => AttendanceData(
     dateDuration: dateDuration ?? this.dateDuration,
     records: records ?? this.records,
-    totalAttendance: totalAttendance ?? this.totalAttendance,
   );
 
   factory AttendanceData.fromMap(Map<String, dynamic> json) => AttendanceData(
     dateDuration: json["dateDuration"],
-    records: json["record"] != null
-      ? List<Record>.from(json["record"].map((x) => Record.fromMap(x)))
-      : List<Record>.from(json["week"].map((x) => Record.fromMap(x))),
-    totalAttendance: json["totalAttendance"],
+    records: List<Record>.from(json["records"].map((x) => Record.fromMap(x))),
   );
 
   Map<String, dynamic> toMap() => {
     "dateDuration": dateDuration,
-    "week": List<dynamic>.from(records.map((x) => x.toMap())),
-    "totalAttendance": totalAttendance,
+    "record": List<Record>.from(records.map((x) => x.toMap())),
   };
 }
 

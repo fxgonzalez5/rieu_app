@@ -1,5 +1,7 @@
-import 'package:rieu/domain/entities/user_entity.dart';
+import 'package:rieu/domain/entities/entities.dart';
 
 abstract class UserRepository {
   Future<UserEntity> getUserById(String id);
+  Future<List<Course>> getUserCourses(List<String> courseIds, {int limit = 10, int offset = 0});
+
 }
