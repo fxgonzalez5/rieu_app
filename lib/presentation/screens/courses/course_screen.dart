@@ -306,7 +306,8 @@ class _OverviewSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
-    final user = context.watch<UserProvider>().user;
+    final userProvider = context.watch<UserProvider>();
+    final user = userProvider.user;
 
     return SizedBox(
       height: responsive.hp(12.5),
@@ -340,7 +341,8 @@ class _OverviewSection extends StatelessWidget {
                   onPressed: () => showRatingDialog(context,
                     initialRating: course.getParticipant(user.id)!.rating,
                     onRatingUpdate: (rating) {
-                      // TODO: Implementar la actualización de la calificación
+                      userProvider.updateCourseRating(course.id, rating);
+                      context.read<CourseProvider>().updateLocalCourseRating(course.id, user.id, rating);
                     }
                   ),
                 ),

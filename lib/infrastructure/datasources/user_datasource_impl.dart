@@ -43,4 +43,16 @@ class UserDatasourceImpl implements UserDatasource {
       throw Exception('Error al obtener los cursos del usuario.\n$e');
     }
   }
+  
+  @override
+  Future<void> updateCourseRating(String courseId, String userId, double rating) async {
+    try {
+      await _db.collection('courses').doc(courseId).collection('participants').doc(userId).update({
+        'rating': rating,
+      });
+    } catch (e) {
+      throw Exception('Error al actualizar la calificación: $e');
+    }
+  }
+  
 }

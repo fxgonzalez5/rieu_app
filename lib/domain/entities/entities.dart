@@ -1,3 +1,4 @@
+export 'package:rieu/domain/entities/course_status_data.dart';
 export 'package:rieu/domain/entities/attendance_data.dart';
 export 'package:rieu/domain/entities/participant.dart';
 export 'package:rieu/domain/entities/course.dart';

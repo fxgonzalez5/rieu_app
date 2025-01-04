@@ -48,4 +48,7 @@ class UserProvider extends ChangeNotifier {
     page = 0;
     await loadNextPage();
   }
+
+  Future<void> updateCourseRating(String courseId, double rating) async 
+    => await userRepository.updateCourseRating(courseId, _user.id, rating);   
 }

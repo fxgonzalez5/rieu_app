@@ -5,32 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 import 'package:rieu/domain/entities/entities.dart';
 
-enum CourseStatus {available, unavailable, pending, canceled, accepted}
 typedef GetCourseCallback = Future<Course>Function(String courseId);
-
-class CourseStatusData {
-  final CourseStatus status;
-  final String text, textButton;
-
-  const CourseStatusData({
-    required this.status,
-    required this.text,
-    required this.textButton,
-  });
-}
-
-const List<CourseStatusData> _administratorCourseStatuses = [
-  CourseStatusData(status: CourseStatus.available, text: 'Curso disponible', textButton: 'Registrar'),
-  CourseStatusData(status: CourseStatus.unavailable, text: 'Curso no disponible', textButton: ''),
-];
-
-const List<CourseStatusData> _courseStatusList = [
-  CourseStatusData(status: CourseStatus.available, text: 'Participa en el curso', textButton: 'Inscribirme'),
-  CourseStatusData(status: CourseStatus.unavailable, text: 'Tiempo de inscripción finalizado', textButton: ''),
-  CourseStatusData(status: CourseStatus.accepted, text: '', textButton: ''),
-  CourseStatusData(status: CourseStatus.pending, text: 'Tu solicitud se encuentra', textButton: 'En revisión'),
-  CourseStatusData(status: CourseStatus.canceled, text: 'Tu solicitud ha sido', textButton: 'Rechazada'),
-];
 
 class CourseProvider extends ChangeNotifier {
   final Map<String, Course> _coursesMap = {};
@@ -38,6 +13,19 @@ class CourseProvider extends ChangeNotifier {
   final GetCourseCallback getCourse;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   String _errorMessage = '';
+
+  static const List<CourseStatusData> _administratorCourseStatuses = [
+    CourseStatusData(status: CourseStatus.available, text: 'Curso disponible', textButton: 'Registrar'),
+    CourseStatusData(status: CourseStatus.unavailable, text: 'Curso no disponible', textButton: ''),
+  ];
+
+  static const List<CourseStatusData> _courseStatusList = [
+    CourseStatusData(status: CourseStatus.available, text: 'Participa en el curso', textButton: 'Inscribirme'),
+    CourseStatusData(status: CourseStatus.unavailable, text: 'Tiempo de inscripción finalizado', textButton: ''),
+    CourseStatusData(status: CourseStatus.accepted, text: '', textButton: ''),
+    CourseStatusData(status: CourseStatus.pending, text: 'Tu solicitud se encuentra', textButton: 'En revisión'),
+    CourseStatusData(status: CourseStatus.canceled, text: 'Tu solicitud ha sido', textButton: 'Rechazada'),
+  ];
 
   CourseProvider({required this.getCourse});
 
@@ -90,6 +78,16 @@ class CourseProvider extends ChangeNotifier {
         }
       }
     }
+  }
+
+  void updateLocalCourseRating(String courseId, String userId, double rating) {
+    final course = _coursesMap[courseId]!;
+    final participant = course.getParticipant(userId)!;
+    final updatedParticipant = participant.copyWith(rating: rating);
+
+    course.updateParticipant(userId, updatedParticipant);
+    _coursesMap[courseId] = course;
+    notifyListeners();
   }
 
   Stream<bool> onQRViewCreated(QRViewController controller, String qrType) async* {

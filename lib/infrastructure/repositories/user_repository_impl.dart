@@ -23,4 +23,10 @@ class UserRepositoryImpl extends UserRepository {
   Future<List<Course>> getUserCourses(List<String> courseIds, {int limit = 10, int offset = 0}) {
     return datasource.getUserCourses(courseIds, limit: limit, offset: offset);
   }
+  
+  @override
+  Future<void> updateCourseRating(String courseId, String userId, double rating) {
+    return datasource.updateCourseRating(courseId, userId, rating);	
+  }
+
 }
