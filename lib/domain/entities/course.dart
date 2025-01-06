@@ -53,7 +53,7 @@ class Course {
   }
 
   void updateParticipant(String userId, Participant participant) {
-    final index = participants.indexWhere((element) => element.keys.first == userId);
+    final index = participants.indexWhere((element) => element.keys.single == userId);
     if (index != -1) {
       participants[index][userId] = participant;
     }

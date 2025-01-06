@@ -100,7 +100,7 @@ class _CustomQrScannerState extends State<_CustomQrScanner> with TickerProviderS
         children: [
           QRView(
             key: courseProvider.qrKey,
-            onQRViewCreated: (controller) => courseProvider.onQRViewCreated(controller, widget.qrType).listen((success) {
+            onQRViewCreated: (controller) => courseProvider.onQRViewCreated(controller, user.id, widget.qrType).listen((success) {
               animationController.stop();
               if (success) {
                 if (user.isAdmin) {
@@ -116,11 +116,6 @@ class _CustomQrScannerState extends State<_CustomQrScanner> with TickerProviderS
                   'title': 'Asistencia Registrada',
                   'subtitle': course != null ? '${course.name}\n${TextFormats.date(DateTime.now())} ${TextFormats.time(DateTime.now())}' : null,
                   'nextRoute': widget.nextRoute
-                });
-              } else {
-                showSnackBarWhitAction(context, message: 'El código QR no es válido', onPressed: () {
-                  controller.resumeCamera();
-                  animationController.repeat(reverse: true);
                 });
               }
             }).onError((e) {

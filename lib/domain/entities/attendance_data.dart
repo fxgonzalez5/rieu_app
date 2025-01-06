@@ -8,10 +8,9 @@ class AttendanceData {
   });
 
   AttendanceData copyWith({
-    String? dateDuration,
     List<Record>? records,
   }) => AttendanceData(
-    dateDuration: dateDuration ?? this.dateDuration,
+    dateDuration: dateDuration,
     records: records ?? this.records,
   );
 
@@ -19,49 +18,39 @@ class AttendanceData {
     dateDuration: json["dateDuration"],
     records: List<Record>.from(json["records"].map((x) => Record.fromMap(x))),
   );
-
-  Map<String, dynamic> toMap() => {
-    "dateDuration": dateDuration,
-    "record": List<Record>.from(records.map((x) => x.toMap())),
-  };
 }
 
 class Record {
-  final String name;
+  final DateTime date;
+  final String text;
   final String input;
   final String output;
-  final bool? coffee;
+  final bool coffee;
 
   Record({
-    required this.name,
+    required this.date,
+    required this.text,
     required this.input,
     required this.output,
     required this.coffee,
   });
 
   Record copyWith({
-    String? name,
     String? input,
     String? output,
-    bool? coffee,
   }) => Record(
-    name: name ?? this.name,
+    date: date,
+    text: text,
     input: input ?? this.input,
     output: output ?? this.output,
-    coffee: coffee ?? this.coffee,
+    coffee: coffee,
   );
 
   factory Record.fromMap(Map<String, dynamic> json) => Record(
-    name: json["name"] ?? json["day"],
+    date: DateTime.parse(json["date"]),
+    text: json["name"] ?? json["day"],
     input: json["input"],
     output: json["output"],
     coffee: json["coffee"],
   );
-
-  Map<String, dynamic> toMap() => {
-    "day": name,
-    "input": input,
-    "output": output,
-    "coffee": coffee,
-  };
 }

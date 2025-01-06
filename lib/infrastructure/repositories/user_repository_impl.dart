@@ -1,8 +1,6 @@
 import 'package:rieu/domain/datasources/user_datasource.dart';
-import 'package:rieu/domain/entities/course.dart';
-import 'package:rieu/domain/entities/user_entity.dart';
+import 'package:rieu/domain/entities/entities.dart';
 import 'package:rieu/domain/repositories/repositories.dart';
-import 'package:rieu/domain/repositories/user_repository.dart';
 import 'package:rieu/infrastructure/datasources/user_datasource_impl.dart';
 
 class UserRepositoryImpl extends UserRepository {
@@ -27,6 +25,11 @@ class UserRepositoryImpl extends UserRepository {
   @override
   Future<void> updateCourseRating(String courseId, String userId, double rating) {
     return datasource.updateCourseRating(courseId, userId, rating);	
+  }
+
+  @override
+  Future<void> registerAttendance(String userId, QrData data, String qrType, {int weekIndex = -1}) {
+    return datasource.registerAttendance(userId, data, qrType, weekIndex: weekIndex);
   }
 
 }

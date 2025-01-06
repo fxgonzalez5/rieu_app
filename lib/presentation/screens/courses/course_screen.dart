@@ -39,7 +39,7 @@ class _CourseScreenState extends State<CourseScreen> {
 
     if (courseProvider.errorMessage.isNotEmpty) {
       return PopScope(
-        onPopInvoked: (_) => courseProvider.errorMessage = '',
+        onPopInvoked: (_) => courseProvider.resetErrorMessage(),
         child: Scaffold(
           appBar: AppBar(),
           body: Center(

@@ -59,9 +59,27 @@ class TextFormats {
     return formatter.format(dateTime);
   }
 
-  static String time(DateTime dateTime) {
+  static String time(DateTime dateTime, {bool is24HourFormat = false}) {
+    if (is24HourFormat) {
+      final formatter = DateFormat('HH:mm');
+      return formatter.format(dateTime);
+    }
+    
     final formatter = DateFormat('HH:mm a');
-
     return formatter.format(dateTime);
+  }
+
+  static String day(DateTime dateTime) {
+    const Map<int, String> weekdays = {
+      1: 'Lunes',
+      2: 'Martes',
+      3: 'Miércoles',
+      4: 'Jueves',
+      5: 'Viernes',
+      6: 'Sábado',
+      7: 'Domingo',
+    };
+    
+    return weekdays[dateTime.weekday]!;
   }
 }

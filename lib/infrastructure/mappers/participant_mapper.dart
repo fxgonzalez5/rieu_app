@@ -1,5 +1,6 @@
 import 'package:rieu/domain/entities/entities.dart';
 import 'package:rieu/infrastructure/models/models.dart';
+import 'package:rieu/config/helpers/helpers.dart';
 
 class ParticipantMapper {
   static Participant participantToEntity(ParticipantFirebase participantFirebase) => Participant(
@@ -8,7 +9,8 @@ class ParticipantMapper {
         dateDuration: attendanceData.dateDuration,
         records: attendanceData.week.map(
           (record) => Record(
-            name: record.day,
+            date: record.date,
+            text: TextFormats.day(record.date),
             input: record.input,
             output: record.output,
             coffee: record.coffee,

@@ -1,16 +1,18 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/widgets.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
+import 'package:rieu/config/helpers/helpers.dart';
 import 'package:rieu/domain/entities/entities.dart';
 
 typedef GetCourseCallback = Future<Course>Function(String courseId);
+typedef MarkAttendanceCallback = Future<void> Function(QrData data, String qrType, int weekIndex);
 
 class CourseProvider extends ChangeNotifier {
   final Map<String, Course> _coursesMap = {};
   final Map<String, CourseStatusData> _coursesStatusMap = {};
   final GetCourseCallback getCourse;
+  final MarkAttendanceCallback markAttendance;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   String _errorMessage = '';
 
@@ -27,14 +29,14 @@ class CourseProvider extends ChangeNotifier {
     CourseStatusData(status: CourseStatus.canceled, text: 'Tu solicitud ha sido', textButton: 'Rechazada'),
   ];
 
-  CourseProvider({required this.getCourse});
+  CourseProvider({required this.getCourse, required this.markAttendance});
 
   Map<String, Course> get coursesMap => _coursesMap;
   Map<String, CourseStatusData> get coursesStatusMap => _coursesStatusMap;
 
   String get errorMessage => _errorMessage;
-  set errorMessage(String value) {
-    _errorMessage = value;
+  void resetErrorMessage() {
+    _errorMessage = '';
     notifyListeners();
   }
 
@@ -45,7 +47,7 @@ class CourseProvider extends ChangeNotifier {
       final course = await getCourse(courseId);
       _coursesMap[courseId] = course;
     } catch (e) {
-      errorMessage = 'No se puede cargar el curso';
+      _errorMessage = 'No se puede cargar el curso';
     }
     notifyListeners();
   }
@@ -55,6 +57,7 @@ class CourseProvider extends ChangeNotifier {
 
     if (isAdmin) {
       // TODO: Implementar lógica para administradores
+      _coursesStatusMap[courseId] = _courseStatusList.firstWhere((element) => element.status == CourseStatus.accepted);
     } else {
       final participant = course.getParticipant(userId);
   
@@ -90,39 +93,92 @@ class CourseProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Stream<bool> onQRViewCreated(QRViewController controller, String qrType) async* {
+  Stream<bool> onQRViewCreated(QRViewController controller, String userId, String qrType) async* {
     yield* controller.scannedDataStream.asyncMap((scanData) async {
       try {
-        if (scanData.code == null) {
+        if (scanData.code == null || scanData.code!.trim().isEmpty) {
           controller.pauseCamera();
-          return false;
+          throw Exception('El código QR no es válido');
         }
 
-        final jsonMap = jsonDecode(scanData.code!);
-        controller.pauseCamera();
+        try {
+          final data = QrData.fromJson(scanData.code!);
+          controller.pauseCamera();
 
-        if (jsonMap is Map && jsonMap.isNotEmpty) {
-          /// El modelo de jsonMap a utilizar es el siguiente:
-          /// {
-          ///   "userId": "String",
-          ///   "date": "DateTime",
-          ///   "courseId": "String",
-          /// }
-          final Map<String, String> result = jsonMap.map((key, value) => MapEntry(key, value));
-          try {
-            await Future.delayed(const Duration(seconds: 1));
-            return true;
-          } catch (e) {
-            throw Exception('Error al realizar el registro, intente nuevamente.');
+          final weekIndex = _updateLocalCourseAttendance(userId, data, qrType);
+          switch (weekIndex) {
+            case -1:
+              throw Exception('No se ha encontrado la semana correspondiente para el registro');
+            case -2:
+              throw Exception('Ya se ha registrado la asistencia para el día de hoy');
           }
-        } 
-        return false;
+
+          await markAttendance(data, qrType, weekIndex);
+          return true;
+        } catch (e) {
+          if (e.runtimeType.toString() == "_TypeError") throw Exception('El código QR no tiene el formato correcto');
+          if (e.toString().contains('encontrado')) throw Exception('Error al registrar asistencia, intente en otro momento');
+          if (e.toString().contains('registrado')) rethrow;
+          throw Exception('Error al realizar el registro, intente nuevamente.');
+        }
       } catch (e) {
-        if (e.toString().contains('Error')) rethrow;
         controller.pauseCamera();
-        return false;
+        rethrow;
       }
     });
+  }
+
+  int _updateLocalCourseAttendance(String userId, QrData data, String qrType) {
+    final course = _coursesMap[data.courseId]!;
+    final participant = course.getParticipant(userId)!;
+
+    // Crear una lista de semanas del curso 
+    final DateTime currentDay = DateFormats.formatDateWithoutTime(data.date);
+    final List<List<DateTime>> weekGroups = DateFormats.getWeekGroups(course.startDate, course.endDate);
+    int weekIndex = -1;
+
+    // Buscar la semana correspondiente a la fecha del registro
+    for (int i = 0; i < weekGroups.length; i++) {
+      final lastDayOfWeek = DateFormats.formatDateWithoutTime(weekGroups[i].last);
+      if (currentDay.isBefore(lastDayOfWeek) || currentDay.isAtSameMomentAs(lastDayOfWeek)) {
+        weekIndex = i;
+        break;
+      }
+    }
+
+    if (weekIndex.isNegative) return -1;
+
+    final List<Record> records = participant.attendanceData![weekIndex].records;
+    final Record record = records.firstWhere((element) {
+      final dateOfRecord = DateFormats.formatDateWithoutTime(element.date);
+      return currentDay.isAtSameMomentAs(dateOfRecord);
+    });
+
+    if ((qrType == 'input' && record.input != "No Registrada") 
+      || (qrType == 'output' && record.output != "No Registrada")) return -2;
+
+    // Actualizar la asistencia del día, enviando la hora del registro
+    final Record updatedRecord = record.copyWith(
+      input: qrType == 'input' ? TextFormats.time(data.date, is24HourFormat: true) : record.input,
+      output: qrType == 'output' ? TextFormats.time(data.date, is24HourFormat: true) : record.output,
+    );
+
+    // Crear la lista de los registros con la asistencia del día actualizada
+    final List<Record> updatedRecords = records.map((element) {
+      final dateOfRecord = DateFormats.formatDateWithoutTime(element.date);
+      return currentDay.isAtSameMomentAs(dateOfRecord) ? updatedRecord : element;
+    }).toList();
+
+    final AttendanceData updatedAttendanceData = participant.attendanceData![weekIndex].copyWith(records: updatedRecords);
+    final Participant updatedParticipant = participant.copyWith(
+      attendanceData: participant.attendanceData!.map((element) => element.dateDuration == updatedAttendanceData.dateDuration ? updatedAttendanceData : element).toList(),
+    );
+
+    course.updateParticipant(userId, updatedParticipant);
+    _coursesMap[data.courseId] = course;
+    notifyListeners();
+
+    return weekIndex;
   }
 
 }

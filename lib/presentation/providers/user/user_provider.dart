@@ -50,5 +50,8 @@ class UserProvider extends ChangeNotifier {
   }
 
   Future<void> updateCourseRating(String courseId, double rating) async 
-    => await userRepository.updateCourseRating(courseId, _user.id, rating);   
+    => await userRepository.updateCourseRating(courseId, _user.id, rating);
+
+  Future<void> registerAttendance(QrData data, String qrType, int weekIndex) async 
+    => await userRepository.registerAttendance(_user.id, data, qrType, weekIndex: weekIndex); 
 }

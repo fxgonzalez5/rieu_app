@@ -15,17 +15,6 @@ ParticipantStatus parseParticipantStatus(String status) {
   }
 }
 
-String participantStatusToString(ParticipantStatus status) {
-  switch (status) {
-    case ParticipantStatus.accepted:
-      return 'aceptado';
-    case ParticipantStatus.pending:
-      return 'pendiente';
-    case ParticipantStatus.rejected:
-      return 'rechazado';
-  }
-}
-
 class Participant {
   final List<AttendanceData>? attendanceData;
   final double? rating;
@@ -38,9 +27,10 @@ class Participant {
   });
 
   Participant copyWith({
+    List<AttendanceData>? attendanceData,
     double? rating,
   }) => Participant(
-    attendanceData: attendanceData,
+    attendanceData: attendanceData ?? this.attendanceData,
     rating: rating ?? this.rating,
     status: status
   );
@@ -50,10 +40,4 @@ class Participant {
     rating: json["rating"]?.toDouble(),
     status: parseParticipantStatus(json["status"]),
   );
-
-  Map<String, dynamic> toMap() => {
-    "attendanceData": attendanceData == null ? [] : List<AttendanceData>.from(attendanceData!.map((x) => x.toMap())),
-    "rating": rating,
-    "status": participantStatusToString(status),
-  };
 }

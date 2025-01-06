@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
+import 'package:rieu/config/helpers/helpers.dart';
 import 'package:rieu/config/theme/responsive.dart';
 import 'package:rieu/domain/entities/entities.dart';
 import 'package:rieu/presentation/providers/providers.dart';
@@ -145,11 +146,16 @@ class _ExpandableListState extends State<_ExpandableList> {
                   children: [
                     buildTableHeader(context),
                     ...attendanceRecord.records.map((record) {
+                      final currentDate = DateFormats.formatDateWithoutTime(DateTime.now());
+                      final dateOfRecord = DateFormats.formatDateWithoutTime(record.date);
+                      final isBefore = currentDate.isBefore(dateOfRecord);
+                      final isToday = currentDate.isAtSameMomentAs(dateOfRecord);
+
                       final newRecord = record.copyWith(
-                        input: record.input == 'No Registrada' ? '' : record.input,
-                        output: record.output == 'No Registrada' ? '' : record.output,
+                        input: record.input == "No Registrada" && (isBefore || isToday) ? '' : record.input,
+                        output: record.output == "No Registrada" && (isBefore || isToday) ? '' : record.output,
                       );
-                      return buildTableBody(context, record: (DateTime.now().isAfter(widget.endDate)) ? record : newRecord);
+                      return buildTableBody(context, record: newRecord);
                     }),
                   ],
                 ),
@@ -163,6 +169,10 @@ class _ExpandableListState extends State<_ExpandableList> {
 
   TableRow buildTableBody(BuildContext context, {required Record record}) {
     final responsive = Responsive(context);
+    final currentDate = DateFormats.formatDateWithoutTime(DateTime.now());
+    final dateOfRecord = DateFormats.formatDateWithoutTime(record.date);
+    final isBefore = currentDate.isBefore(dateOfRecord);
+    final isToday = currentDate.isAtSameMomentAs(dateOfRecord);
 
     return TableRow(
       children: [
@@ -171,15 +181,15 @@ class _ExpandableListState extends State<_ExpandableList> {
             height: responsive.hp(5),
             padding: EdgeInsets.symmetric(horizontal: responsive.wp(2)),
             alignment: Alignment.centerLeft,
-            child: Text(record.name),
+            child: Text(record.text),
           ),
         ),
         TableCell(child: Text(record.input, textAlign: TextAlign.center)),
         TableCell(child: Text(record.output, textAlign: TextAlign.center)),
         TableCell(
-          child: record.coffee == null 
+          child: isBefore || isToday
             ? const SizedBox()
-            : record.coffee!
+            : record.coffee
               ? const Icon(Icons.check)
               : const Icon(Icons.close),
         )
