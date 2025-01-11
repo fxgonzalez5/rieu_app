@@ -100,7 +100,7 @@ class _CustomQrScannerState extends State<_CustomQrScanner> with TickerProviderS
         children: [
           QRView(
             key: courseProvider.qrKey,
-            onQRViewCreated: (controller) => courseProvider.onQRViewCreated(controller, user.id, widget.qrType).listen((success) {
+            onQRViewCreated: (controller) => courseProvider.onQRViewCreated(controller, widget.qrType).listen((success) {
               animationController.stop();
               if (success) {
                 if (user.isAdmin) {

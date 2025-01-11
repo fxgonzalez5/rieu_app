@@ -2,16 +2,17 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
-import 'package:rieu/config/helpers/helpers.dart';
 import 'package:rieu/domain/entities/entities.dart';
 
 typedef GetCourseCallback = Future<Course>Function(String courseId);
-typedef MarkAttendanceCallback = Future<void> Function(QrData data, String qrType, int weekIndex);
+typedef LeaveRatingCallback = Future<Map<String, Participant>> Function(String courseId, double rating);
+typedef MarkAttendanceCallback = Future<Map<String, Participant>> Function(QrData data, String qrType);
 
 class CourseProvider extends ChangeNotifier {
   final Map<String, Course> _coursesMap = {};
   final Map<String, CourseStatusData> _coursesStatusMap = {};
   final GetCourseCallback getCourse;
+  final LeaveRatingCallback leaveRating;
   final MarkAttendanceCallback markAttendance;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   String _errorMessage = '';
@@ -29,7 +30,7 @@ class CourseProvider extends ChangeNotifier {
     CourseStatusData(status: CourseStatus.canceled, text: 'Tu solicitud ha sido', textButton: 'Rechazada'),
   ];
 
-  CourseProvider({required this.getCourse, required this.markAttendance});
+  CourseProvider({required this.getCourse, required this.leaveRating, required this.markAttendance});
 
   Map<String, Course> get coursesMap => _coursesMap;
   Map<String, CourseStatusData> get coursesStatusMap => _coursesStatusMap;
@@ -83,17 +84,21 @@ class CourseProvider extends ChangeNotifier {
     }
   }
 
-  void updateLocalCourseRating(String courseId, String userId, double rating) {
-    final course = _coursesMap[courseId]!;
-    final participant = course.getParticipant(userId)!;
-    final updatedParticipant = participant.copyWith(rating: rating);
+  Future<void> updateTheParticipantRating(String courseId, double rating) async {
+    try {
+      final participantMap = await leaveRating(courseId, rating);
+      final participant = participantMap.values.single;
+      final course = _coursesMap[courseId]!;
 
-    course.updateParticipant(userId, updatedParticipant);
-    _coursesMap[courseId] = course;
-    notifyListeners();
+      course.updateParticipant(participantMap.keys.single, participant);
+      _coursesMap[courseId] = course;
+      notifyListeners();
+    } catch (e) {
+      rethrow;
+    }
   }
 
-  Stream<bool> onQRViewCreated(QRViewController controller, String userId, String qrType) async* {
+  Stream<bool> onQRViewCreated(QRViewController controller, String qrType) async* {
     yield* controller.scannedDataStream.asyncMap((scanData) async {
       try {
         if (scanData.code == null || scanData.code!.trim().isEmpty) {
@@ -105,15 +110,7 @@ class CourseProvider extends ChangeNotifier {
           final data = QrData.fromJson(scanData.code!);
           controller.pauseCamera();
 
-          final weekIndex = _updateLocalCourseAttendance(userId, data, qrType);
-          switch (weekIndex) {
-            case -1:
-              throw Exception('No se ha encontrado la semana correspondiente para el registro');
-            case -2:
-              throw Exception('Ya se ha registrado la asistencia para el día de hoy');
-          }
-
-          await markAttendance(data, qrType, weekIndex);
+          await _updateParticipantAttendance(data, qrType);
           return true;
         } catch (e) {
           if (e.runtimeType.toString() == "_TypeError") throw Exception('El código QR no tiene el formato correcto');
@@ -128,57 +125,18 @@ class CourseProvider extends ChangeNotifier {
     });
   }
 
-  int _updateLocalCourseAttendance(String userId, QrData data, String qrType) {
-    final course = _coursesMap[data.courseId]!;
-    final participant = course.getParticipant(userId)!;
+  Future<void> _updateParticipantAttendance(QrData data, String qrType) async {
+    try {
+      final participantMap = await markAttendance(data, qrType);
+      final participant = participantMap.values.single;
+      final course = _coursesMap[data.courseId]!;
 
-    // Crear una lista de semanas del curso 
-    final DateTime currentDay = DateFormats.formatDateWithoutTime(data.date);
-    final List<List<DateTime>> weekGroups = DateFormats.getWeekGroups(course.startDate, course.endDate);
-    int weekIndex = -1;
-
-    // Buscar la semana correspondiente a la fecha del registro
-    for (int i = 0; i < weekGroups.length; i++) {
-      final lastDayOfWeek = DateFormats.formatDateWithoutTime(weekGroups[i].last);
-      if (currentDay.isBefore(lastDayOfWeek) || currentDay.isAtSameMomentAs(lastDayOfWeek)) {
-        weekIndex = i;
-        break;
-      }
+      course.updateParticipant(participantMap.keys.single, participant);
+      _coursesMap[data.courseId] = course;
+      notifyListeners();
+    } catch (e) {
+      rethrow;
     }
-
-    if (weekIndex.isNegative) return -1;
-
-    final List<Record> records = participant.attendanceData![weekIndex].records;
-    final Record record = records.firstWhere((element) {
-      final dateOfRecord = DateFormats.formatDateWithoutTime(element.date);
-      return currentDay.isAtSameMomentAs(dateOfRecord);
-    });
-
-    if ((qrType == 'input' && record.input != "No Registrada") 
-      || (qrType == 'output' && record.output != "No Registrada")) return -2;
-
-    // Actualizar la asistencia del día, enviando la hora del registro
-    final Record updatedRecord = record.copyWith(
-      input: qrType == 'input' ? TextFormats.time(data.date, is24HourFormat: true) : record.input,
-      output: qrType == 'output' ? TextFormats.time(data.date, is24HourFormat: true) : record.output,
-    );
-
-    // Crear la lista de los registros con la asistencia del día actualizada
-    final List<Record> updatedRecords = records.map((element) {
-      final dateOfRecord = DateFormats.formatDateWithoutTime(element.date);
-      return currentDay.isAtSameMomentAs(dateOfRecord) ? updatedRecord : element;
-    }).toList();
-
-    final AttendanceData updatedAttendanceData = participant.attendanceData![weekIndex].copyWith(records: updatedRecords);
-    final Participant updatedParticipant = participant.copyWith(
-      attendanceData: participant.attendanceData!.map((element) => element.dateDuration == updatedAttendanceData.dateDuration ? updatedAttendanceData : element).toList(),
-    );
-
-    course.updateParticipant(userId, updatedParticipant);
-    _coursesMap[data.courseId] = course;
-    notifyListeners();
-
-    return weekIndex;
   }
 
 }

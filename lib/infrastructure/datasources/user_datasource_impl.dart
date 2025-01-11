@@ -46,7 +46,7 @@ class UserDatasourceImpl implements UserDatasource {
   }
 
   @override
-  Future<void> updateCourseRating(String courseId, String userId, double rating) async {
+  Future<Participant> toGradeCourse(String userId, String courseId, double rating) async {
     try {
       final participantRef = _db.collection('courses').doc(courseId).collection('participants').withConverter(
         fromFirestore: (snapshot, _) => ParticipantFirebase.fromMap(snapshot.data()!),
@@ -60,16 +60,17 @@ class UserDatasourceImpl implements UserDatasource {
       final updatedParticipant = participant.copyWith(rating: rating);
 
       await participantRef.doc(userId).update(updatedParticipant.toMap());
+      return ParticipantMapper.participantToEntity(updatedParticipant);
     } catch (e) {
-      throw Exception('Error al actualizar la calificación: $e');
+      if (e.runtimeType.toString() == '_Exception') rethrow;
+      throw Exception('Error: $e');
     }
   }
 
   @override
-  Future<void> registerAttendance(String userId, QrData data, String qrType, {int weekIndex = -1}) async {
+  Future<Participant> registerAttendance(String userId, QrData data, String qrType) async {
     try {
-      if (weekIndex.isNegative) throw Exception('Error al registrar asistencia: No se ha encontrado la semana correspondiente');
-
+      final Course course = await getCourse(data.courseId);
       final participantRef = _db.collection('courses').doc(data.courseId).collection('participants').withConverter(
         fromFirestore: (snapshot, _) => ParticipantFirebase.fromMap(snapshot.data()!),
         toFirestore: (model, _) => model.toMap(),
@@ -81,32 +82,61 @@ class UserDatasourceImpl implements UserDatasource {
       final ParticipantFirebase participant = participantDoc.data()!;
       final DateTime currentDay = DateFormats.formatDateWithoutTime(data.date);
 
+      // Crear una lista de semanas del curso 
+      final List<List<DateTime>> weekGroups = DateFormats.getWeekGroups(course.startDate, course.endDate);
+      int weekIndex = -1;
+
+      // Buscar la semana correspondiente a la fecha del registro
+      for (int i = 0; i < weekGroups.length; i++) {
+        final lastDayOfWeek = DateFormats.formatDateWithoutTime(weekGroups[i].last);
+        if (currentDay.isBefore(lastDayOfWeek) || currentDay.isAtSameMomentAs(lastDayOfWeek)) {
+          weekIndex = i;
+          break;
+        }
+      }
+
+      // Si no se encontró la semana correspondiente
+      if (weekIndex == -1) throw Exception('No se ha encontrado la semana correspondiente para el registro');
+
       final List<Week> week = participant.attendanceData![weekIndex].week;
       final Week dayWeek = week.firstWhere((element) {
         final dateOfWeek = DateFormats.formatDateWithoutTime(element.date);
         return currentDay.isAtSameMomentAs(dateOfWeek);
-      });
+      }); 
 
-      // Actualizar la asistencia del día, según el tipo de registro, enviando la fecha y hora del registro
+      // Si ya se ha registrado la asistencia para el día de hoy
+      if ((qrType == 'input' && dayWeek.input != "No Registrada") 
+        || (qrType == 'output' && dayWeek.output != "No Registrada")) throw Exception('Ya ha registrado la asistencia de ${qrType == 'input' ? 'entrada' : 'salida'}');
+
+      // Crear el registro de asistencia del día actualizado
       final Week updatedDayWeek = dayWeek.copyWith(
         input: qrType == 'input' ? TextFormats.time(data.date, is24HourFormat: true) : dayWeek.input,
         output: qrType == 'output' ? TextFormats.time(data.date, is24HourFormat: true) : dayWeek.output,
       );
 
-      // Crear la lista de las semanas con la asistencia del día actualizada
+      // Crear la semana con la asistencia del día actualizada
       final List<Week> updatedWeek = week.map((element) {
         final dateOfWeek = DateFormats.formatDateWithoutTime(element.date);
         return currentDay.isAtSameMomentAs(dateOfWeek) ? updatedDayWeek : element;
       }).toList();
-            
+      
+      // Crear el registro de asistencia actualizado
       final AttendanceDataModel updatedAttendanceData = participant.attendanceData![weekIndex].copyWith(week: updatedWeek);
+
+      final List<AttendanceDataModel> attendanceData = participant.attendanceData!;
+      final int index = attendanceData.indexWhere((element) => element.dateDuration == updatedAttendanceData.dateDuration);
+      attendanceData[index] = updatedAttendanceData;
+      
+      // Actualizar la asistencia del participante
       final ParticipantFirebase updatedParticipant = participant.copyWith(
-        attendanceData: participant.attendanceData!.map((element) => element.dateDuration == updatedAttendanceData.dateDuration ? updatedAttendanceData : element).toList(),
+        attendanceData: attendanceData
       );
 
       await participantRef.doc(userId).update(updatedParticipant.toMap());
+      return ParticipantMapper.participantToEntity(updatedParticipant);
     } catch (e) {
-      throw Exception('Error al registrar asistencia: $e');
+      if (e.runtimeType.toString() == '_Exception') rethrow;
+      throw Exception('Error: $e');
     }
   }
   

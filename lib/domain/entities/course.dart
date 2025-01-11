@@ -47,15 +47,15 @@ class Course {
     required this.totalAuthorizedParticipants,
   });
 
-  Participant? getParticipant(String userId) {
-    final participant = participants.firstWhere((element) => element.keys.first == userId, orElse: () => {});
-    return participant[userId];
+  Participant? getParticipant(String participantId) {
+    final participant = participants.firstWhere((element) => element.keys.first == participantId, orElse: () => {});
+    return participant[participantId];
   }
 
-  void updateParticipant(String userId, Participant participant) {
-    final index = participants.indexWhere((element) => element.keys.single == userId);
+  void updateParticipant(String participantId, Participant participant) {
+    final index = participants.indexWhere((element) => element.keys.single == participantId);
     if (index != -1) {
-      participants[index][userId] = participant;
+      participants[index][participantId] = participant;
     }
   }
 }

@@ -306,8 +306,7 @@ class _OverviewSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
-    final userProvider = context.watch<UserProvider>();
-    final user = userProvider.user;
+    final user = context.watch<UserProvider>().user;
 
     return SizedBox(
       height: responsive.hp(12.5),
@@ -340,10 +339,10 @@ class _OverviewSection extends StatelessWidget {
                   icon: const Icon(Icons.star_outlined),
                   onPressed: () => showRatingDialog(context,
                     initialRating: course.getParticipant(user.id)!.rating,
-                    onRatingUpdate: (rating) {
-                      userProvider.updateCourseRating(course.id, rating);
-                      context.read<CourseProvider>().updateLocalCourseRating(course.id, user.id, rating);
-                    }
+                    onRatingUpdate: (rating) async {
+                      await context.read<CourseProvider>().updateTheParticipantRating(course.id, rating)
+                        .catchError((e) => showSnackBar(context, e.toString().replaceAll('Exception: ', '')));
+                    },
                   ),
                 ),
                 const Text('Deja tu\ncalificación', textAlign: TextAlign.center),

@@ -23,13 +23,13 @@ class UserRepositoryImpl extends UserRepository {
   }
   
   @override
-  Future<void> updateCourseRating(String courseId, String userId, double rating) {
-    return datasource.updateCourseRating(courseId, userId, rating);	
+  Future<Participant> toGradeCourse(String userId, String courseId, double rating) {
+    return datasource.toGradeCourse(userId, courseId, rating);	
   }
 
   @override
-  Future<void> registerAttendance(String userId, QrData data, String qrType, {int weekIndex = -1}) {
-    return datasource.registerAttendance(userId, data, qrType, weekIndex: weekIndex);
+  Future<Participant> registerAttendance(String userId, QrData data, String qrType) {
+    return datasource.registerAttendance(userId, data, qrType);
   }
 
 }

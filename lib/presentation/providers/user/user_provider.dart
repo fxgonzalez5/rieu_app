@@ -49,9 +49,22 @@ class UserProvider extends ChangeNotifier {
     await loadNextPage();
   }
 
-  Future<void> updateCourseRating(String courseId, double rating) async 
-    => await userRepository.updateCourseRating(courseId, _user.id, rating);
+  Future<Map<String, Participant>> toGradeCourse(String courseId, double rating) async {
+    try {
+      final participant = await userRepository.toGradeCourse(_user.id, courseId, rating);
+      return {_user.id: participant};
+    } catch (e) {
+      throw Exception('Error al calificar el curso');
+    }
+  }
 
-  Future<void> registerAttendance(QrData data, String qrType, int weekIndex) async 
-    => await userRepository.registerAttendance(_user.id, data, qrType, weekIndex: weekIndex); 
+  Future<Map<String, Participant>> registerAttendance(QrData data, String qrType) async {
+    try {
+      final participant = await userRepository.registerAttendance(_user.id, data, qrType);
+      return {_user.id: participant};
+    } catch (e) {
+      if (e.toString().contains('Error:')) throw Exception('Error al registrar la asistencia');
+      rethrow;
+    }
+  }
 }

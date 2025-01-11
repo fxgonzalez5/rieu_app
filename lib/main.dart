@@ -68,7 +68,8 @@ class MainApp extends StatelessWidget {
           },
         ),
         ChangeNotifierProvider(create: (context) => CourseProvider(
-          getCourse: coursesRepository.getCourseById, 
+          getCourse: coursesRepository.getCourseById,
+          leaveRating: context.read<UserProvider>().toGradeCourse,
           markAttendance: context.read<UserProvider>().registerAttendance
         )),
         ChangeNotifierProvider(

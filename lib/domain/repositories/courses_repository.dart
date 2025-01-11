@@ -1,4 +1,4 @@
-import 'package:rieu/domain/entities/course.dart';
+import 'package:rieu/domain/entities/entities.dart';
 
 abstract class CoursesRepository {
   Future<List<Course>> getCourses({int limit = 10, int offset = 0, String lastCourseId = ''});
