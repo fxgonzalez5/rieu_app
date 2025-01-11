@@ -57,30 +57,34 @@ class CourseProvider extends ChangeNotifier {
     final course = _coursesMap[courseId]!;
 
     if (isAdmin) {
-      // TODO: Implementar lógica para administradores
+      final administrator = course.getAdministrator(userId);
+
+      if (administrator == null) return _getCourseStatusByDate(courseId, course.applicationDeadline, _administratorCourseStatuses);
       _coursesStatusMap[courseId] = _courseStatusList.firstWhere((element) => element.status == CourseStatus.accepted);
     } else {
       final participant = course.getParticipant(userId);
   
-      if (participant == null) {
-        if (DateTime.now().isAfter(course.applicationDeadline)) {
-          _coursesStatusMap[courseId] = _courseStatusList.firstWhere((element) => element.status == CourseStatus.unavailable);
-        } else {
-          _coursesStatusMap[courseId] = _courseStatusList.firstWhere((element) => element.status == CourseStatus.available);
-        }
-      } else {
-        switch (participant.status) {
-          case ParticipantStatus.accepted:
-            _coursesStatusMap[courseId] = _courseStatusList.firstWhere((element) => element.status == CourseStatus.accepted);
-            break;
-          case ParticipantStatus.pending:
-            _coursesStatusMap[courseId] = _courseStatusList.firstWhere((element) => element.status == CourseStatus.pending);
-            break;
-          case ParticipantStatus.rejected:
-            _coursesStatusMap[courseId] = _courseStatusList.firstWhere((element) => element.status == CourseStatus.canceled);
-            break;
-        }
+      if (participant == null) return _getCourseStatusByDate(courseId, course.applicationDeadline, _courseStatusList);
+      
+      switch (participant.status) {
+        case ParticipantStatus.accepted:
+          _coursesStatusMap[courseId] = _courseStatusList.firstWhere((element) => element.status == CourseStatus.accepted);
+          break;
+        case ParticipantStatus.pending:
+          _coursesStatusMap[courseId] = _courseStatusList.firstWhere((element) => element.status == CourseStatus.pending);
+          break;
+        case ParticipantStatus.rejected:
+          _coursesStatusMap[courseId] = _courseStatusList.firstWhere((element) => element.status == CourseStatus.canceled);
+          break;
       }
+    }
+  }
+
+  void _getCourseStatusByDate(String courseId, DateTime applicationDeadline, List<CourseStatusData> courseStatusList) {
+    if (DateTime.now().isAfter(applicationDeadline)) {
+      _coursesStatusMap[courseId] = courseStatusList.firstWhere((element) => element.status == CourseStatus.unavailable);
+    } else {
+      _coursesStatusMap[courseId] = courseStatusList.firstWhere((element) => element.status == CourseStatus.available);
     }
   }
 

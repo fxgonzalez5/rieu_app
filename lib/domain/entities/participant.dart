@@ -34,10 +34,4 @@ class Participant {
     rating: rating ?? this.rating,
     status: status
   );
-
-  factory Participant.fromMap(Map<String, dynamic> json) => Participant(
-    attendanceData: json["attendanceData"] == null ? null : List<AttendanceData>.from(json["attendanceData"]!.map((x) => AttendanceData.fromMap(x))),
-    rating: json["rating"]?.toDouble(),
-    status: parseParticipantStatus(json["status"]),
-  );
 }

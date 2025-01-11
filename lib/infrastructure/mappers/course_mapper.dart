@@ -2,7 +2,7 @@ import 'package:rieu/domain/entities/entities.dart';
 import 'package:rieu/infrastructure/models/models.dart';
 
 class CourseMapper {
-  static Course courseFirebaseToEntity(CourseFirebase courseFirebase, List<Map<String, Participant>> participants) => Course(
+  static Course courseFirebaseToEntity(CourseFirebase courseFirebase, List<Map<String, Administrator>> administrators, List<Map<String, Participant>> participants) => Course(
     id: courseFirebase.id,
     posterPath: courseFirebase.posterPath ?? 'https://firebasestorage.googleapis.com/v0/b/app-liid-9ede6.appspot.com/o/Course%2Fno-image.jpeg?alt=media&token=816cd4b6-3c53-4fce-bd79-1873853519ce',
     name: courseFirebase.courseName,
@@ -27,6 +27,7 @@ class CourseMapper {
     creationDate: courseFirebase.creationDate,
     applicationDeadline: courseFirebase.applicationDeadline,
     authorization: courseFirebase.authorization,
+    administrators: administrators,
     participants: participants,
     totalAuthorizedParticipants: courseFirebase.totalAuthorizedParticipants,
   );

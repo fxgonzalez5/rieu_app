@@ -1,6 +1,5 @@
 import 'package:rieu/domain/datasources/courses_datasource.dart';
 import 'package:rieu/domain/entities/course.dart';
-import 'package:rieu/domain/entities/participant.dart';
 import 'package:rieu/domain/repositories/courses_repository.dart';
 
 class CoursesRepositoryImpl implements CoursesRepository {

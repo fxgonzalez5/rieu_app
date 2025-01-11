@@ -19,10 +19,16 @@ class HistoryView extends StatelessWidget {
     final responsive = Responsive(context);
     final texts = Theme.of(context).textTheme;
     final course = context.read<CourseProvider>().coursesMap[courseId]!;
-    final userProvider = context.read<UserProvider>();
-    final participant = course.getParticipant(userProvider.user.id)!;
+    final user = context.read<UserProvider>().user;
+    late final List<AttendanceData> attendanceData;
+    
+    if (user.isAdmin) {
+      attendanceData = course.getAdministrator(user.id)!.attendanceData ?? [];
+    } else {
+      attendanceData = course.getParticipant(user.id)!.attendanceData ?? [];
+    }
 
-    if (course.totalAuthorizedParticipants > 0) {
+    if (attendanceData.isNotEmpty) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -31,9 +37,8 @@ class HistoryView extends StatelessWidget {
             child: Text('Registro de asistencias:', style: texts.bodyLarge!.copyWith(fontWeight: FontWeight.bold)),
           ),
           _ExpandableList(
-            isAdmin: userProvider.user.isAdmin,
-            attendanceData: participant.attendanceData!,
-            endDate: course.endDate,
+            isAdmin: user.isAdmin,
+            attendanceData: attendanceData,
             totalAuthorizedUsers: course.totalAuthorizedParticipants,
           ),
         ],
@@ -49,13 +54,11 @@ class HistoryView extends StatelessWidget {
 class _ExpandableList extends StatefulWidget {
   final bool isAdmin;
   final List<AttendanceData> attendanceData;
-  final DateTime endDate;
   final int totalAuthorizedUsers;
 
   const _ExpandableList({
     this.isAdmin = false,
     required this.attendanceData,
-    required this.endDate,
     required this.totalAuthorizedUsers,
   });
 

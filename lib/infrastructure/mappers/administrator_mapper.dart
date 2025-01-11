@@ -1,16 +1,15 @@
 import 'package:rieu/domain/entities/entities.dart';
 import 'package:rieu/infrastructure/models/models.dart';
-import 'package:rieu/config/helpers/helpers.dart';
 
-class ParticipantMapper {
-  static Participant participantToEntity(ParticipantFirebase participantFirebase) => Participant(
-    attendanceData: participantFirebase.attendanceData?.map(
+class AdministratorMapper {
+  static Administrator administratorToEntity(AdministratorFirebase administratorFirebase) => Administrator(
+    attendanceData: administratorFirebase.attendanceData?.map(
       (attendanceData) => AttendanceData(
         dateDuration: attendanceData.dateDuration,
         records: attendanceData.records.map(
           (record) => Record(
             date: record.date,
-            text: TextFormats.day(record.date),
+            text: record.name!,
             input: record.input,
             output: record.output,
             coffee: record.coffee,
@@ -18,7 +17,5 @@ class ParticipantMapper {
         ).toList(),
       )
     ).toList(),
-    rating: participantFirebase.rating,
-    status: parseParticipantStatus(participantFirebase.status),
   );
 }

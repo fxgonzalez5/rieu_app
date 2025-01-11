@@ -98,30 +98,30 @@ class UserDatasourceImpl implements UserDatasource {
       // Si no se encontró la semana correspondiente
       if (weekIndex == -1) throw Exception('No se ha encontrado la semana correspondiente para el registro');
 
-      final List<Week> week = participant.attendanceData![weekIndex].week;
-      final Week dayWeek = week.firstWhere((element) {
-        final dateOfWeek = DateFormats.formatDateWithoutTime(element.date);
-        return currentDay.isAtSameMomentAs(dateOfWeek);
-      }); 
+      final List<RecordModel> records = participant.attendanceData![weekIndex].records;
+      final RecordModel record = records.firstWhere((element) {
+        final dateOfRecord = DateFormats.formatDateWithoutTime(element.date);
+        return currentDay.isAtSameMomentAs(dateOfRecord);
+      });
 
       // Si ya se ha registrado la asistencia para el día de hoy
-      if ((qrType == 'input' && dayWeek.input != "No Registrada") 
-        || (qrType == 'output' && dayWeek.output != "No Registrada")) throw Exception('Ya ha registrado la asistencia de ${qrType == 'input' ? 'entrada' : 'salida'}');
+      if ((qrType == 'input' && record.input != "No Registrada") 
+        || (qrType == 'output' && record.output != "No Registrada")) throw Exception('Ya ha registrado la asistencia de ${qrType == 'input' ? 'entrada' : 'salida'}');
 
       // Crear el registro de asistencia del día actualizado
-      final Week updatedDayWeek = dayWeek.copyWith(
-        input: qrType == 'input' ? TextFormats.time(data.date, is24HourFormat: true) : dayWeek.input,
-        output: qrType == 'output' ? TextFormats.time(data.date, is24HourFormat: true) : dayWeek.output,
+      final RecordModel updatedRecord = record.copyWith(
+        input: qrType == 'input' ? TextFormats.time(data.date, is24HourFormat: true) : record.input,
+        output: qrType == 'output' ? TextFormats.time(data.date, is24HourFormat: true) : record.output,
       );
 
-      // Crear la semana con la asistencia del día actualizada
-      final List<Week> updatedWeek = week.map((element) {
+      // Crear la lista de las registros con la asistencia del día actualizada
+      final List<RecordModel> updatedRecords = records.map((element) {
         final dateOfWeek = DateFormats.formatDateWithoutTime(element.date);
-        return currentDay.isAtSameMomentAs(dateOfWeek) ? updatedDayWeek : element;
+        return currentDay.isAtSameMomentAs(dateOfWeek) ? updatedRecord : element;
       }).toList();
-      
+            
       // Crear el registro de asistencia actualizado
-      final AttendanceDataModel updatedAttendanceData = participant.attendanceData![weekIndex].copyWith(week: updatedWeek);
+      final AttendanceDataModel updatedAttendanceData = participant.attendanceData![weekIndex].copyWith(records: updatedRecords);      
 
       final List<AttendanceDataModel> attendanceData = participant.attendanceData!;
       final int index = attendanceData.indexWhere((element) => element.dateDuration == updatedAttendanceData.dateDuration);

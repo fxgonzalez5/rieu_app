@@ -13,11 +13,6 @@ class AttendanceData {
     dateDuration: dateDuration,
     records: records ?? this.records,
   );
-
-  factory AttendanceData.fromMap(Map<String, dynamic> json) => AttendanceData(
-    dateDuration: json["dateDuration"],
-    records: List<Record>.from(json["records"].map((x) => Record.fromMap(x))),
-  );
 }
 
 class Record {
@@ -44,13 +39,5 @@ class Record {
     input: input ?? this.input,
     output: output ?? this.output,
     coffee: coffee,
-  );
-
-  factory Record.fromMap(Map<String, dynamic> json) => Record(
-    date: DateTime.parse(json["date"]),
-    text: json["name"] ?? json["day"],
-    input: json["input"],
-    output: json["output"],
-    coffee: json["coffee"],
   );
 }

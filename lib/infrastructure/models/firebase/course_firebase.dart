@@ -18,7 +18,6 @@ class CourseFirebase {
   final DateTime creationDate;
   final DateTime applicationDeadline;
   final bool authorization;
-  // final List<String> registeredAdministrators;
   final int totalAuthorizedParticipants;
 
   CourseFirebase({
@@ -41,7 +40,6 @@ class CourseFirebase {
     required this.creationDate,
     required this.applicationDeadline,
     required this.authorization,
-    // required this.registeredAdministrators,
     required this.totalAuthorizedParticipants,
   });
 
@@ -65,7 +63,6 @@ class CourseFirebase {
     creationDate: DateTime.parse(json["creationDate"]),
     applicationDeadline: DateTime.parse(json["applicationDeadline"]),
     authorization: json["authorization"],
-    // registeredAdministrators: List<String>.from(json["registeredAdministrators"].map((x) => x)),
     totalAuthorizedParticipants: json["totalAuthorizedParticipants"],
   );
 
@@ -89,7 +86,6 @@ class CourseFirebase {
     "creationDate": creationDate.toIso8601String(),
     "applicationDeadline": applicationDeadline.toIso8601String(),
     "authorization": authorization,
-    // "registeredAdministrators": List<dynamic>.from(registeredAdministrators.map((x) => x)),
     "totalAuthorizedParticipants": totalAuthorizedParticipants,
   };
 }

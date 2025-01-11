@@ -20,6 +20,7 @@ class Course {
   final DateTime creationDate;
   final DateTime applicationDeadline;
   final bool authorization;
+  final List<Map<String, Administrator>> administrators;
   final List<Map<String, Participant>> participants;
   final int totalAuthorizedParticipants;
 
@@ -43,13 +44,19 @@ class Course {
     required this.creationDate,
     required this.applicationDeadline,
     required this.authorization,
+    required this.administrators,
     required this.participants,
     required this.totalAuthorizedParticipants,
   });
 
-  Participant? getParticipant(String participantId) {
-    final participant = participants.firstWhere((element) => element.keys.first == participantId, orElse: () => {});
-    return participant[participantId];
+  Administrator? getAdministrator(String userId) {
+    final administrator = administrators.firstWhere((element) => element.keys.first == userId, orElse: () => {});
+    return administrator[userId];
+  }
+
+  Participant? getParticipant(String userId) {
+    final participant = participants.firstWhere((element) => element.keys.first == userId, orElse: () => {});
+    return participant[userId];
   }
 
   void updateParticipant(String participantId, Participant participant) {
