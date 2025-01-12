@@ -24,6 +24,66 @@ class UserDatasourceImpl implements UserDatasource {
     }
   }
 
+      
+  @override
+  Future<Course> enrollTheCourse(String userId, bool isAdmin, String courseId) async {
+    try {
+      // Actualización de la lista de cursos del usuario
+      final userRef = _db.collection('users').doc(userId).withConverter(
+        fromFirestore: (snapshot, _) => UserEntity.fromMap(snapshot.data()!),
+        toFirestore: (model, _) => model.toMap(),
+      );
+
+      final userDoc = await userRef.get();
+      if (!userDoc.exists) throw Exception('Usuario no encontrado');
+
+      final user = userDoc.data()!;
+      final updatedUser = user.copyWith(courses: [...user.courses, courseId]);
+
+      final course = await getCourse(courseId);
+      if (isAdmin) {
+        // Actualización de la lista de administradores del curso
+        final administratorRef = _db.collection('courses').doc(courseId).collection('administrators').withConverter(
+          fromFirestore: (snapshot, _) => AdministratorFirebase.fromMap(snapshot.data()!),
+          toFirestore: (model, _) => model.toMap(),
+        );
+
+        final administratorDoc = await administratorRef.doc(userId).get();
+        if (administratorDoc.exists) throw Exception('Este usuario ya es administrador del curso');
+
+        final newAdministrator = Administrator();
+        await userRef.update(updatedUser.toMap());
+        await administratorRef.doc(userId).set(AdministratorMapper.administratorToModel(newAdministrator));
+        course.addAdministrator(userId, newAdministrator);
+        return course;
+      } else {
+        // Actualización de la lista de participantes del curso
+        final participantRef = _db.collection('courses').doc(courseId).collection('participants').withConverter(
+          fromFirestore: (snapshot, _) => ParticipantFirebase.fromMap(snapshot.data()!),
+          toFirestore: (model, _) => model.toMap(),
+        );
+
+        final participantDoc = await participantRef.doc(userId).get();
+        if (participantDoc.exists) throw Exception('Este usuario ya está inscrito en el curso');
+        late final Participant newParticipant;
+
+        if (course.authorization) {
+          newParticipant = Participant();
+        } else {
+          newParticipant = Participant(attendanceData: [], status: ParticipantStatus.accepted);
+        }
+
+        await userRef.update(updatedUser.toMap());
+        await participantRef.doc(userId).set(ParticipantMapper.participantToModel(newParticipant));
+        course.addParticipant(userId,newParticipant);
+        return course;
+      }
+    } catch (e) {
+      if (e.runtimeType.toString() == '_Exception') rethrow;
+      throw Exception('Error: $e');
+    }
+  }
+
   @override
   Future<List<Course>> getUserCourses(List<String> courseIds, {int limit = 10, int offset = 0}) async {
     try {
@@ -180,5 +240,5 @@ class UserDatasourceImpl implements UserDatasource {
 
     return attendanceData;
   }
-  
+
 }

@@ -82,15 +82,33 @@ class _CustomAnimateState extends State<_CustomAnimate> with TickerProviderState
     BubbleModel(anglePosition: 285, durationMilliseconds: 400, offsetY: -40),
     BubbleModel(anglePosition: 325, durationMilliseconds: 200, offsetX: 75, offsetY: -85),
   ];
-  late final List<AnimationController> controllers;
-  late final List<Animation<double>> opacityAnimations, angleAnimations;
+  final List<AnimationController> controllers = [];
+  final List<Animation<double>> opacityAnimations = [], angleAnimations = [];
   late final Animation<double> rightAnimation;
 
   @override
   void initState() {
     super.initState();
-    // Inicializar la lista de los controladores
-    controllers = bubbles.map((bubble) => AnimationController(vsync: this, duration: Duration(milliseconds: bubble.durationMilliseconds))).toList();
+    // Inicializar controladores
+    for (var bubble in bubbles) {
+      controllers.add(AnimationController(vsync: this, duration: Duration(milliseconds: bubble.durationMilliseconds)));
+    }
+
+    // Inicializar animaciones
+    for (var controller in controllers) {
+      opacityAnimations.add(
+        Tween(begin:  0.0, end: 1.0).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut))
+      );
+    }
+
+    for (int i = 0; i < controllers.length; i++) {
+      double begin = i == 0 ? 0 : degreesToRadians(bubbles[i - 1].anglePosition);
+      double end = degreesToRadians(bubbles[i].anglePosition);
+
+      angleAnimations.add(
+        Tween(begin: begin, end: end).animate(CurvedAnimation(parent: controllers[i], curve: Curves.easeInOut))
+      );
+    }
 
     startAnimation(0);
   }
@@ -103,22 +121,9 @@ class _CustomAnimateState extends State<_CustomAnimate> with TickerProviderState
     final responsive = Responsive(context);
     final radius = min(responsive.ip(15) * 0.5, responsive.ip(15) * 0.5) + responsive.ip(2.5);
 
-    opacityAnimations = List.generate(bubbles.length, (index) => Tween(begin:  0.0, end: 1.0).animate(
-      CurvedAnimation(parent: controllers[index], curve: Curves.easeInOut)
-    ));
-
     rightAnimation = Tween(begin: 0.0, end: radius + 30).animate(
       CurvedAnimation(parent: controllers[0], curve: Curves.easeInOutCubic)
     );
-
-    angleAnimations = List.generate(bubbles.length, (index) {
-      double begin = index == 0 ? 0 : degreesToRadians(bubbles[index - 1].anglePosition);
-      double end = degreesToRadians(bubbles[index].anglePosition);
-      
-      return Tween(begin: begin, end: end).animate(
-        CurvedAnimation(parent: controllers[index], curve: Curves.easeInOut)
-      );
-    });
   }
 
   void startAnimation(int index) async {

@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
+import 'package:rieu/config/helpers/date_formats.dart';
 import 'package:rieu/domain/entities/entities.dart';
 
 typedef GetCourseCallback = Future<Course>Function(String courseId);
+typedef RegisterCourseCallback = Future<Course>Function(String courseId);
 typedef GetAdministratorCallback = Future<Administrator>Function(String courseId, String	administratorId);
 typedef GetParticipantCallback = Future<Participant> Function(String courseId, String	participantId);
 typedef LeaveRatingCallback = Future<Map<String, Participant>> Function(String courseId, double rating);
@@ -15,6 +17,7 @@ class CourseProvider extends ChangeNotifier {
   final Map<String, CourseStatusData> _coursesStatusMap = {};
 
   final GetCourseCallback getCourse;
+  final RegisterCourseCallback registerCourse;
   final GetAdministratorCallback getAdministrator;
   final GetParticipantCallback getParticipant;
   final LeaveRatingCallback leaveRating;
@@ -39,6 +42,7 @@ class CourseProvider extends ChangeNotifier {
 
   CourseProvider({
     required this.getCourse,
+    required this.registerCourse,
     required this.getAdministrator,
     required this.getParticipant,
     required this.leaveRating,
@@ -96,10 +100,27 @@ class CourseProvider extends ChangeNotifier {
   }
 
   void _getCourseStatusByDate(String courseId, DateTime applicationDeadline, List<CourseStatusData> courseStatusList) {
-    if (DateTime.now().isAfter(applicationDeadline)) {
+    final currentDate = DateFormats.formatDateWithoutTime(DateTime.now());
+    if (currentDate.isAfter(applicationDeadline)) {
       _coursesStatusMap[courseId] = courseStatusList.firstWhere((element) => element.status == CourseStatus.unavailable);
     } else {
       _coursesStatusMap[courseId] = courseStatusList.firstWhere((element) => element.status == CourseStatus.available);
+    }
+  }
+
+  Future<void> updateCourseAdministratorsAndParticipants(String courseId, String userId, bool isAdmin, List<String> allowedCoursesTypes) async {
+    try {
+      final currentCourse = _coursesMap[courseId]!;
+      if (isAdmin && !allowedCoursesTypes.contains(currentCourse.category)) {
+        throw Exception('No tienes permisos para registrarse a este curso');     
+      }
+
+      final updatedCourse = await registerCourse(courseId);
+      _coursesMap[courseId] = updatedCourse;
+      fetchCourseStatus(courseId: courseId, userId: userId, isAdmin: isAdmin);
+      notifyListeners();
+    } catch (e) {
+      throw Exception('Error al registrarse al curso');
     }
   }
 

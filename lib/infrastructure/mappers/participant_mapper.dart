@@ -21,4 +21,22 @@ class ParticipantMapper {
     rating: participantFirebase.rating,
     status: parseParticipantStatus(participantFirebase.status),
   );
+
+  static ParticipantFirebase participantToModel(Participant participant) => ParticipantFirebase(
+    attendanceData: participant.attendanceData?.map(
+      (attendanceData) => AttendanceDataModel(
+        dateDuration: attendanceData.dateDuration,
+        records: attendanceData.records.map(
+          (record) => RecordModel(
+            date: record.date,
+            input: record.input,
+            output: record.output,
+            coffee: record.coffee,
+          )
+        ).toList(),
+      )
+    ).toList(),
+    rating: participant.rating,
+    status: participantStatusToString(participant.status),
+  );
 }

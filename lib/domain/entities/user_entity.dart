@@ -34,16 +34,25 @@ class UserEntity {
     String? photoUrl,
     String? name,
     String? email,
+    List<String>? roles,
     String? institution,
     String? city,
+    List<String>? courses,
   }) {
     return UserEntity(
       id: id ?? this.id,
       photoUrl: photoUrl ?? this.photoUrl,
       name: name ?? this.name,
       email: email ?? this.email,
+      roles: roles ?? this.roles,
       institution: institution ?? this.institution,
       city: city ?? this.city,
+      courses: courses ?? this.courses,
+      totalCourses: totalCourses,
+      mostActiveCourse: mostActiveCourse,
+      totalActiveCourses: totalActiveCourses,
+      totalCoursesCompleted: totalCoursesCompleted,
+      allowedCoursesTypes: allowedCoursesTypes,
     );
   }
 
@@ -63,21 +72,25 @@ class UserEntity {
     allowedCoursesTypes: json["allowedCoursesTypes"] != null ? List<String>.from(json["allowedCoursesTypes"].map((x) => x)) : null,
   );
 
-  Map<String, dynamic> toMap() => {
-    "id": id,
-    "photo": photoUrl,
-    "name": name,
-    "email": email,
-    "roles": List<String>.from(roles.map((x) => x)),
-    "institution": institution,
-    "city": city,
-    "courses": List<String>.from(courses.map((x) => x)),
-    "totalCourses": totalCourses,
-    "mostActiveCourse": mostActiveCourse,
-    "totalActiveCourses": totalActiveCourses,
-    "totalCoursesCompleted": totalCoursesCompleted,
-    "allowedCoursesTypes": allowedCoursesTypes != null ? List<String>.from(allowedCoursesTypes!.map((x) => x)) : null,
-  };
+  Map<String, dynamic> toMap() {
+    final Map<String, dynamic> map = {
+      "id": id,
+      "photo": photoUrl,
+      "name": name,
+      "email": email,
+      "roles": List<String>.from(roles.map((x) => x)),
+      "institution": institution,
+      "city": city,
+      "courses": List<String>.from(courses.map((x) => x)),
+      "totalCourses": totalCourses,
+      "mostActiveCourse": mostActiveCourse,
+      "totalActiveCourses": totalActiveCourses,
+      "totalCoursesCompleted": totalCoursesCompleted,
+    };
+
+    if (isAdmin) map["allowedCoursesTypes"] = allowedCoursesTypes != null ? List<String>.from(allowedCoursesTypes!.map((x) => x)) : null;
+    return map;
+  }
 
   bool get isAdmin => roles.contains('admin');
 

@@ -18,4 +18,21 @@ class AdministratorMapper {
       )
     ).toList(),
   );
+
+  static AdministratorFirebase administratorToModel(Administrator administrator) => AdministratorFirebase(
+    attendanceData: administrator.attendanceData?.map(
+      (attendanceData) => AttendanceDataModel(
+        dateDuration: attendanceData.dateDuration,
+        records: attendanceData.records.map(
+          (record) => RecordModel(
+            date: record.date,
+            name: record.text,
+            input: record.input,
+            output: record.output,
+            coffee: record.coffee,
+          )
+        ).toList(),
+      )
+    ).toList()
+  );
 }

@@ -15,15 +15,26 @@ ParticipantStatus parseParticipantStatus(String status) {
   }
 }
 
+String participantStatusToString(ParticipantStatus status) {
+  switch (status) {
+    case ParticipantStatus.accepted:
+      return 'aceptado';
+    case ParticipantStatus.pending:
+      return 'pendiente';
+    case ParticipantStatus.rejected:
+      return 'rechazado';
+  }
+}
+
 class Participant {
   final List<AttendanceData>? attendanceData;
   final double? rating;
   final ParticipantStatus status;
 
   Participant({
-    required this.attendanceData,
-    required this.rating,
-    required this.status,
+    this.attendanceData,
+    this.rating,
+    this.status = ParticipantStatus.pending,
   });
 
   Participant copyWith({

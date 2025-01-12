@@ -4,6 +4,6 @@ class Administrator {
   final List<AttendanceData>? attendanceData;
 
   Administrator({
-    required this.attendanceData,
+    this.attendanceData = const [],
   });
 }

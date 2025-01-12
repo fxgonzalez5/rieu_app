@@ -136,24 +136,25 @@ class _CourseBody extends StatelessWidget {
         ),
 
         if (courseStatus.status != CourseStatus.accepted)
-          _FloatingBox(courseStatus, user),
+          _FloatingBox(course.id, user),
       ],
     );
   }
 }
 
 class _FloatingBox extends StatelessWidget {
-  final CourseStatusData courseStatus;
+  final String courseId;
   final UserEntity user;
   
   const _FloatingBox(
-    this.courseStatus,
+    this.courseId,
     this.user,
   );
 
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
+    final courseStatus = context.watch<CourseProvider>().coursesStatusMap[courseId]!;
 
     Color? colorButton() {
       switch (courseStatus.status) {
@@ -195,10 +196,12 @@ class _FloatingBox extends StatelessWidget {
               ),
               onPressed: courseStatus.status == CourseStatus.unavailable 
                 ? null 
-                : () {
-                  // TODO: Implementar la lógica para registrar al usuario en el curso
-                  // TODO: Implementar la logica para registrar al administrador en el curso, si tiene permitida dicha categoría
-                },
+                : () async {
+                    await context.read<CourseProvider>().updateCourseAdministratorsAndParticipants(courseId, user.id, user.isAdmin, 
+                      user.isAdmin ? user.allowedCoursesTypes! : []).catchError(
+                        (e) => showSnackBar(context, e.toString().replaceAll('Exception: ', ''))
+                      );
+                  },
               child: Text(courseStatus.textButton),
             ),
         ],
@@ -229,6 +232,17 @@ class _ContentTabsState extends State<_ContentTabs> with TickerProviderStateMixi
     super.initState();
     viewTabs = buildViewTabs();
     tabController = TabController(length: viewTabs.length, vsync: this);
+  }
+
+  @override
+  void didUpdateWidget(covariant _ContentTabs oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    
+    if (oldWidget.status != widget.status) {
+      setState(() {
+        viewTabs = buildViewTabs();
+      });
+    }
   }
 
   @override

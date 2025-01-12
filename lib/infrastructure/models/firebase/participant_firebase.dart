@@ -27,7 +27,7 @@ class ParticipantFirebase {
   );
 
   Map<String, dynamic> toMap() => {
-    "attendanceData": attendanceData == null ? [] : List<dynamic>.from(attendanceData!.map((x) => x.toMap())),
+    "attendanceData": attendanceData == null ? null : List<dynamic>.from(attendanceData!.map((x) => x.toMap())),
     "rating": rating,
     "status": status,
   };

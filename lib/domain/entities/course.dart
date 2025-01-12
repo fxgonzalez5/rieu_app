@@ -54,6 +54,10 @@ class Course {
     return administrator[userId];
   }
 
+  void addAdministrator(String administratorId, Administrator administrator) {
+    administrators.add({administratorId: administrator});
+  }
+
   void updateAdministrator(String administratorId, Administrator administrator) {
     final index = administrators.indexWhere((element) => element.keys.single == administratorId);
     if (index != -1) {
@@ -64,6 +68,10 @@ class Course {
   Participant? getParticipant(String userId) {
     final participant = participants.firstWhere((element) => element.keys.first == userId, orElse: () => {});
     return participant[userId];
+  }
+
+  void addParticipant(String participantId, Participant participant) {
+    participants.add({participantId: participant});
   }
 
   void updateParticipant(String participantId, Participant participant) {

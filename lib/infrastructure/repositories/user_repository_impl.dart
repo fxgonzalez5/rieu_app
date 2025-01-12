@@ -18,6 +18,11 @@ class UserRepositoryImpl extends UserRepository {
   }
 
   @override
+  Future<Course> enrollTheCourse(String userId, bool isAdmin, String courseId) {
+    return datasource.enrollTheCourse(userId, isAdmin, courseId);
+  }
+
+  @override
   Future<List<Course>> getUserCourses(List<String> courseIds, {int limit = 10, int offset = 0}) {
     return datasource.getUserCourses(courseIds, limit: limit, offset: offset);
   }
@@ -36,5 +41,4 @@ class UserRepositoryImpl extends UserRepository {
   Future<Participant> registerRefreshment(QrData data, String qrType) {
     return datasource.registerRefreshment(data, qrType);
   }
-
 }

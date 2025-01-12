@@ -40,7 +40,7 @@ class RegisterView extends StatelessWidget {
                 title: '1. Registro de entrada',
                 subtitle: 'Escanea el código QR proporcionado por el instructor o la institución al ingresar para registrar tu asistencia.',
                 onPressed: () {
-                  //TODO: Desactivar el botón cuando el estudiante realice el registro correctamente
+                  //TODO: Desactivar el botón cuando el estudiante realice el registro correctamente, solo si es necesario 
                   context.push('${GoRouterState.of(context).matchedLocation}/qr-scan/input', extra: GoRouterState.of(context).matchedLocation);
                 },
               ),
@@ -48,7 +48,7 @@ class RegisterView extends StatelessWidget {
                 title: '2. Registro de salida',
                 subtitle: 'Escanea el código QR proporcionado por el instructor o la institución al salir para registrar tu asistencia.',
                 onPressed: () {
-                  //TODO: Desactivar el botón cuando el estudiante realice el registro correctamente
+                  //TODO: Desactivar el botón cuando el estudiante realice el registro correctamente, solo si es necesario
                   context.push('${GoRouterState.of(context).matchedLocation}/qr-scan/output', extra: GoRouterState.of(context).matchedLocation);
                 },
               ),

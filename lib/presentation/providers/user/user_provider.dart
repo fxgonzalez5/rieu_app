@@ -49,6 +49,17 @@ class UserProvider extends ChangeNotifier {
     await loadNextPage();
   }
 
+  Future<Course> enrollTheCourse(String courseId) async {
+    try {
+      final course = await userRepository.enrollTheCourse(_user.id, _user.isAdmin, courseId);
+      _courses.add(course);
+      notifyListeners();
+      return course;
+    } catch (e) {
+      throw Exception('Error al inscribirse al curso');
+    }
+  }
+
   Future<Map<String, Participant>> toGradeCourse(String courseId, double rating) async {
     try {
       final participant = await userRepository.toGradeCourse(_user.id, courseId, rating);
