@@ -5,6 +5,7 @@ abstract class CoursesDatasource {
   Future<List<Map<String, Administrator>>> getAdministratorsForCourse(String courseId);
   Future<Administrator> getAdministratorById(String courseId, String userId);
   Future<List<Map<String, Participant>>> getParticipantsForCourse(String courseId);
+  Future<Participant> getParticipantById(String courseId, String userId);
   Future<Course> getCourseById(String id);
   Future<List<Course>> getCourseByCategory(String category, {int limit = 10, int offset = 0, String lastCourseId = ''});
   Future<List<Course>> getCourseBySearch(String query, {int limit = 10, int offset = 0, String lastCourseId = ''});

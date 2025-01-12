@@ -31,4 +31,9 @@ class CoursesRepositoryImpl implements CoursesRepository {
   Future<Administrator> getAdministratorById(String courseId, String userId) {
     return datasource.getAdministratorById(courseId, userId);
   }
+  
+  @override
+  Future<Participant> getParticipantById(String courseId, String userId) {
+    return datasource.getParticipantById(courseId, userId);
+  }
 }

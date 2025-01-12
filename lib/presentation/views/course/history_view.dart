@@ -83,7 +83,7 @@ class _ExpandableListState extends State<_ExpandableList> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final user = context.read<UserProvider>().user;
-      if (user.isAdmin) context.read<CourseProvider>().loadAdministrator(widget.courseId, user.id);
+      context.read<CourseProvider>().loadUserRecords(widget.courseId, user.id, user.isAdmin);
     });
   }
 
@@ -227,7 +227,7 @@ class _ExpandableListState extends State<_ExpandableList> {
         TableCell(child: Text(record.input, textAlign: TextAlign.center)),
         TableCell(child: Text(record.output, textAlign: TextAlign.center)),
         TableCell(
-          child: isBefore || isToday
+          child: !record.coffee && (isBefore || isToday) 
             ? const SizedBox()
             : record.coffee
               ? const Icon(Icons.check)

@@ -6,6 +6,7 @@ import 'package:rieu/domain/entities/entities.dart';
 
 typedef GetCourseCallback = Future<Course>Function(String courseId);
 typedef GetAdministratorCallback = Future<Administrator>Function(String courseId, String	administratorId);
+typedef GetParticipantCallback = Future<Participant> Function(String courseId, String	participantId);
 typedef LeaveRatingCallback = Future<Map<String, Participant>> Function(String courseId, double rating);
 typedef MarkAttendanceCallback = Future<Map<String, Participant>> Function(QrData data, String qrType);
 
@@ -15,6 +16,7 @@ class CourseProvider extends ChangeNotifier {
 
   final GetCourseCallback getCourse;
   final GetAdministratorCallback getAdministrator;
+  final GetParticipantCallback getParticipant;
   final LeaveRatingCallback leaveRating;
   final MarkAttendanceCallback markAttendance;
   
@@ -38,6 +40,7 @@ class CourseProvider extends ChangeNotifier {
   CourseProvider({
     required this.getCourse,
     required this.getAdministrator,
+    required this.getParticipant,
     required this.leaveRating,
     required this.markAttendance
   });
@@ -100,17 +103,23 @@ class CourseProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> loadAdministrator(String courseId, String userId) async {
+  Future<void> loadUserRecords(String courseId, String userId, bool isAdmin) async {
     if (isLoading) return;
 
     isLoading = true;
     notifyListeners();
 
     try {
-      final administrator = await getAdministrator(courseId, userId);
       final course = _coursesMap[courseId]!;
 
-      course.updateAdministrator(userId, administrator);
+      if (isAdmin) {
+        final administrator = await getAdministrator(courseId, userId);
+        course.updateAdministrator(userId, administrator);
+      } else {
+        final participant = await getParticipant(courseId, userId);
+        course.updateParticipant(userId, participant);
+      }
+      
       _coursesMap[courseId] = course;
     } catch (e) {
       _errorMessage2 = 'No se puede cargar el registro de asistencias';

@@ -64,13 +64,13 @@ class FirebaseDataSource implements CoursesDatasource {
   @override
   Future<Administrator> getAdministratorById(String courseId, String userId) async {
     try {
-      final administratorsFirebase = _db.collection('courses').doc(courseId).collection('administrators').doc(userId)
+      final administratorFirebase = _db.collection('courses').doc(courseId).collection('administrators').doc(userId)
         .withConverter(
           fromFirestore: (snapshot, _) => AdministratorFirebase.fromMap(snapshot.data()!),
           toFirestore: (model, _) => model.toMap(),
         );
 
-      final administrator = await administratorsFirebase.get();      
+      final administrator = await administratorFirebase.get();      
       return AdministratorMapper.administratorToEntity(administrator.data()!);
     } catch (e) {
       throw Exception('Error al obtener el administrador: $e');
@@ -93,6 +93,22 @@ class FirebaseDataSource implements CoursesDatasource {
       return participants;
     } catch (e) {
       throw Exception('Error al obtener los participantes para el curso $courseId: $e');
+    }
+  }
+
+  @override
+  Future<Participant> getParticipantById(String courseId, String userId) async {
+    try {
+      final participantFirebase = _db.collection('courses').doc(courseId).collection('participants').doc(userId)
+        .withConverter(
+          fromFirestore: (snapshot, _) => ParticipantFirebase.fromMap(snapshot.data()!),
+          toFirestore: (model, _) => model.toMap(),
+        );
+
+      final participant = await participantFirebase.get();      
+      return ParticipantMapper.participantToEntity(participant.data()!);
+    } catch (e) {
+      throw Exception('Error al obtener el participante: $e');
     }
   }
 
