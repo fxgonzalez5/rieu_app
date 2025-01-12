@@ -5,17 +5,22 @@ import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 import 'package:rieu/domain/entities/entities.dart';
 
 typedef GetCourseCallback = Future<Course>Function(String courseId);
+typedef GetAdministratorCallback = Future<Administrator>Function(String courseId, String	administratorId);
 typedef LeaveRatingCallback = Future<Map<String, Participant>> Function(String courseId, double rating);
 typedef MarkAttendanceCallback = Future<Map<String, Participant>> Function(QrData data, String qrType);
 
 class CourseProvider extends ChangeNotifier {
   final Map<String, Course> _coursesMap = {};
   final Map<String, CourseStatusData> _coursesStatusMap = {};
+
   final GetCourseCallback getCourse;
+  final GetAdministratorCallback getAdministrator;
   final LeaveRatingCallback leaveRating;
   final MarkAttendanceCallback markAttendance;
+  
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-  String _errorMessage = '';
+  String _errorMessage = '', _errorMessage2 = '';
+  bool isLoading = false;
 
   static const List<CourseStatusData> _administratorCourseStatuses = [
     CourseStatusData(status: CourseStatus.available, text: 'Curso disponible', textButton: 'Registrar'),
@@ -30,14 +35,21 @@ class CourseProvider extends ChangeNotifier {
     CourseStatusData(status: CourseStatus.canceled, text: 'Tu solicitud ha sido', textButton: 'Rechazada'),
   ];
 
-  CourseProvider({required this.getCourse, required this.leaveRating, required this.markAttendance});
+  CourseProvider({
+    required this.getCourse,
+    required this.getAdministrator,
+    required this.leaveRating,
+    required this.markAttendance
+  });
 
   Map<String, Course> get coursesMap => _coursesMap;
   Map<String, CourseStatusData> get coursesStatusMap => _coursesStatusMap;
 
   String get errorMessage => _errorMessage;
+  String get errorMessage2 => _errorMessage2;
   void resetErrorMessage() {
     _errorMessage = '';
+    _errorMessage2 = '';
     notifyListeners();
   }
 
@@ -86,6 +98,26 @@ class CourseProvider extends ChangeNotifier {
     } else {
       _coursesStatusMap[courseId] = courseStatusList.firstWhere((element) => element.status == CourseStatus.available);
     }
+  }
+
+  Future<void> loadAdministrator(String courseId, String userId) async {
+    if (isLoading) return;
+
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      final administrator = await getAdministrator(courseId, userId);
+      final course = _coursesMap[courseId]!;
+
+      course.updateAdministrator(userId, administrator);
+      _coursesMap[courseId] = course;
+    } catch (e) {
+      _errorMessage2 = 'No se puede cargar el registro de asistencias';
+    }
+
+    isLoading = false;
+    notifyListeners();
   }
 
   Future<void> updateTheParticipantRating(String courseId, double rating) async {
@@ -142,5 +174,4 @@ class CourseProvider extends ChangeNotifier {
       rethrow;
     }
   }
-
 }

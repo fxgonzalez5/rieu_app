@@ -1,5 +1,5 @@
 import 'package:rieu/domain/datasources/courses_datasource.dart';
-import 'package:rieu/domain/entities/course.dart';
+import 'package:rieu/domain/entities/entities.dart';
 import 'package:rieu/domain/repositories/courses_repository.dart';
 
 class CoursesRepositoryImpl implements CoursesRepository {
@@ -25,5 +25,10 @@ class CoursesRepositoryImpl implements CoursesRepository {
   @override
   Future<List<Course>> getCourseBySearch(String query, {int limit = 10, int offset = 0, String lastCourseId = ''}) {
     return datasource.getCourseBySearch(query, limit: limit, offset: offset, lastCourseId: lastCourseId);
+  }
+
+  @override
+  Future<Administrator> getAdministratorById(String courseId, String userId) {
+    return datasource.getAdministratorById(courseId, userId);
   }
 }

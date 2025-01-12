@@ -31,5 +31,10 @@ class UserRepositoryImpl extends UserRepository {
   Future<Participant> registerAttendance(String userId, QrData data, String qrType) {
     return datasource.registerAttendance(userId, data, qrType);
   }
+  
+  @override
+  Future<Participant> registerRefreshment(QrData data, String qrType) {
+    return datasource.registerRefreshment(data, qrType);
+  }
 
 }

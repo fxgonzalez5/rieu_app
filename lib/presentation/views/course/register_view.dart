@@ -31,7 +31,7 @@ class RegisterView extends StatelessWidget {
               buildListTile(context,
                 title: 'Registro de comida',
                 subtitle: 'Escanea el código QR del usuario para registrar que ha recibido su café.',
-                onPressed: () => context.push('${GoRouterState.of(context).matchedLocation}/qr-scan/coffe'),
+                onPressed: () => context.push('${GoRouterState.of(context).matchedLocation}/qr-scan/coffee'),
               ),
             ]
           else 

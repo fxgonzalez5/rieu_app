@@ -60,7 +60,9 @@ class UserProvider extends ChangeNotifier {
 
   Future<Map<String, Participant>> registerAttendance(QrData data, String qrType) async {
     try {
-      final participant = await userRepository.registerAttendance(_user.id, data, qrType);
+      final participant = _user.isAdmin 
+        ? await userRepository.registerRefreshment(data, qrType) 
+        : await userRepository.registerAttendance(_user.id, data, qrType);
       return {_user.id: participant};
     } catch (e) {
       if (e.toString().contains('Error:')) throw Exception('Error al registrar la asistencia');

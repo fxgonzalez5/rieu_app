@@ -10,4 +10,8 @@ class AdministratorFirebase {
   factory AdministratorFirebase.fromMap(Map<String, dynamic> json) => AdministratorFirebase(
     attendanceData: json["attendanceData"] == null ? [] : List<AttendanceDataModel>.from(json["attendanceData"]!.map((x) => AttendanceDataModel.fromMap(x))),
   );
+
+  Map<String, dynamic> toMap() => {
+    "attendanceData": attendanceData == null ? [] : List<dynamic>.from(attendanceData!.map((x) => x.toMap())),
+  };
 }

@@ -18,8 +18,8 @@ class HistoryView extends StatelessWidget {
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
     final texts = Theme.of(context).textTheme;
-    final course = context.read<CourseProvider>().coursesMap[courseId]!;
-    final user = context.read<UserProvider>().user;
+    final course = context.watch<CourseProvider>().coursesMap[courseId]!;
+    final user = context.watch<UserProvider>().user;
     late final List<AttendanceData> attendanceData;
     
     if (user.isAdmin) {
@@ -28,36 +28,39 @@ class HistoryView extends StatelessWidget {
       attendanceData = course.getParticipant(user.id)!.attendanceData ?? [];
     }
 
-    if (attendanceData.isNotEmpty) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: responsive.hp(2)),
-            child: Text('Registro de asistencias:', style: texts.bodyLarge!.copyWith(fontWeight: FontWeight.bold)),
-          ),
-          _ExpandableList(
-            isAdmin: user.isAdmin,
-            attendanceData: attendanceData,
-            totalAuthorizedUsers: course.totalAuthorizedParticipants,
-          ),
-        ],
-      );
-    } else {
+    if (attendanceData.isEmpty) {
       return const Center(
         child: Text('No hay inscripciones registradas', style: TextStyle(fontWeight: FontWeight.bold)),
       );
     }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: responsive.hp(2)),
+          child: Text('Registro de asistencias:', style: texts.bodyLarge!.copyWith(fontWeight: FontWeight.bold)),
+        ),
+        _ExpandableList(
+          isAdmin: user.isAdmin,
+          courseId: courseId,
+          attendanceData: attendanceData,
+          totalAuthorizedUsers: course.totalAuthorizedParticipants,
+        ),
+      ],
+    );
   }
 }
 
 class _ExpandableList extends StatefulWidget {
   final bool isAdmin;
+  final String courseId;
   final List<AttendanceData> attendanceData;
   final int totalAuthorizedUsers;
 
   const _ExpandableList({
     this.isAdmin = false,
+    required this.courseId,
     required this.attendanceData,
     required this.totalAuthorizedUsers,
   });
@@ -77,6 +80,11 @@ class _ExpandableListState extends State<_ExpandableList> {
     scrollController = ScrollController();
     controllers = List.generate(widget.attendanceData.length,  (_) => ExpandableController());
     keys.addAll(List.generate(widget.attendanceData.length, (_) => GlobalKey()));
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final user = context.read<UserProvider>().user;
+      if (user.isAdmin) context.read<CourseProvider>().loadAdministrator(widget.courseId, user.id);
+    });
   }
 
   @override
@@ -107,6 +115,35 @@ class _ExpandableListState extends State<_ExpandableList> {
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
+    final colors = Theme.of(context).colorScheme;
+    final courseProvider = context.watch<CourseProvider>();
+
+    if (courseProvider.errorMessage2.isNotEmpty) {
+      return Expanded(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error, size: responsive.ip(5), color: colors.error),
+              SizedBox(height: responsive.hp(2)),
+              Text(courseProvider.errorMessage2),
+              SizedBox(height: responsive.hp(3)),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (courseProvider.isLoading) {
+      return Expanded(
+        child: Center(
+          child: Image(
+            image: const AssetImage('assets/loaders/spin_loading.gif'),
+            width: responsive.wp(15),
+          ),
+        ),
+      );
+    }
 
     return Expanded(
       child: ListView.builder(

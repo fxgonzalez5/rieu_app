@@ -62,6 +62,22 @@ class FirebaseDataSource implements CoursesDatasource {
   }
 
   @override
+  Future<Administrator> getAdministratorById(String courseId, String userId) async {
+    try {
+      final administratorsFirebase = _db.collection('courses').doc(courseId).collection('administrators').doc(userId)
+        .withConverter(
+          fromFirestore: (snapshot, _) => AdministratorFirebase.fromMap(snapshot.data()!),
+          toFirestore: (model, _) => model.toMap(),
+        );
+
+      final administrator = await administratorsFirebase.get();      
+      return AdministratorMapper.administratorToEntity(administrator.data()!);
+    } catch (e) {
+      throw Exception('Error al obtener el administrador: $e');
+    }
+  }
+
+  @override
   Future<List<Map<String, Participant>>> getParticipantsForCourse(String courseId) async {
     try {
       final participantsFirebase = await _db.collection('courses').doc(courseId).collection('participants').get();

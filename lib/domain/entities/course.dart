@@ -54,6 +54,13 @@ class Course {
     return administrator[userId];
   }
 
+  void updateAdministrator(String administratorId, Administrator administrator) {
+    final index = administrators.indexWhere((element) => element.keys.single == administratorId);
+    if (index != -1) {
+      administrators[index][administratorId] = administrator;
+    }
+  }
+
   Participant? getParticipant(String userId) {
     final participant = participants.firstWhere((element) => element.keys.first == userId, orElse: () => {});
     return participant[userId];

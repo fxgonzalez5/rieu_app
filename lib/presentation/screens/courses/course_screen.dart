@@ -265,6 +265,9 @@ class _ContentTabsState extends State<_ContentTabs> with TickerProviderStateMixi
             if (index > viewTabs.length - 3 && widget.status != CourseStatus.accepted) {
               tabController.animateTo(tabController.previousIndex);
             }
+            if (tabController.previousIndex == 3) {
+              context.read<CourseProvider>().resetErrorMessage();
+            }
           },
           tabs: [
             Tab(icon: Icon(Icons.article_outlined, size: iconTheme.size)),
