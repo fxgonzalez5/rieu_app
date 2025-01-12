@@ -16,12 +16,12 @@ class CourseProvider extends ChangeNotifier {
   final Map<String, Course> _coursesMap = {};
   final Map<String, CourseStatusData> _coursesStatusMap = {};
 
-  final GetCourseCallback getCourse;
-  final RegisterCourseCallback registerCourse;
-  final GetAdministratorCallback getAdministrator;
-  final GetParticipantCallback getParticipant;
-  final LeaveRatingCallback leaveRating;
-  final MarkAttendanceCallback markAttendance;
+  final GetCourseCallback _getCourse;
+  final RegisterCourseCallback _registerCourse;
+  final GetAdministratorCallback _getAdministrator;
+  final GetParticipantCallback _getParticipant;
+  final LeaveRatingCallback _leaveRating;
+  final MarkAttendanceCallback _markAttendance;
   
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   String _errorMessage = '', _errorMessage2 = '';
@@ -41,13 +41,13 @@ class CourseProvider extends ChangeNotifier {
   ];
 
   CourseProvider({
-    required this.getCourse,
-    required this.registerCourse,
-    required this.getAdministrator,
-    required this.getParticipant,
-    required this.leaveRating,
-    required this.markAttendance
-  });
+    required Future<Course> Function(String) getCourse,
+    required Future<Course> Function(String) registerCourse,
+    required Future<Administrator> Function(String, String) getAdministrator,
+    required Future<Participant> Function(String, String) getParticipant,
+    required Future<Map<String, Participant>> Function(String, double) leaveRating,
+    required Future<Map<String, Participant>> Function(QrData, String) markAttendance
+  }) : _markAttendance = markAttendance, _leaveRating = leaveRating, _getParticipant = getParticipant, _getAdministrator = getAdministrator, _registerCourse = registerCourse, _getCourse = getCourse;
 
   Map<String, Course> get coursesMap => _coursesMap;
   Map<String, CourseStatusData> get coursesStatusMap => _coursesStatusMap;
@@ -64,7 +64,7 @@ class CourseProvider extends ChangeNotifier {
     if (_coursesMap[courseId] != null) return;
 
     try {
-      final course = await getCourse(courseId);
+      final course = await _getCourse(courseId);
       _coursesMap[courseId] = course;
     } catch (e) {
       _errorMessage = 'No se puede cargar el curso';
@@ -115,7 +115,7 @@ class CourseProvider extends ChangeNotifier {
         throw Exception('No tienes permisos para registrarse a este curso');     
       }
 
-      final updatedCourse = await registerCourse(courseId);
+      final updatedCourse = await _registerCourse(courseId);
       _coursesMap[courseId] = updatedCourse;
       fetchCourseStatus(courseId: courseId, userId: userId, isAdmin: isAdmin);
       notifyListeners();
@@ -134,10 +134,10 @@ class CourseProvider extends ChangeNotifier {
       final course = _coursesMap[courseId]!;
 
       if (isAdmin) {
-        final administrator = await getAdministrator(courseId, userId);
+        final administrator = await _getAdministrator(courseId, userId);
         course.updateAdministrator(userId, administrator);
       } else {
-        final participant = await getParticipant(courseId, userId);
+        final participant = await _getParticipant(courseId, userId);
         course.updateParticipant(userId, participant);
       }
       
@@ -152,7 +152,7 @@ class CourseProvider extends ChangeNotifier {
 
   Future<void> updateTheParticipantRating(String courseId, double rating) async {
     try {
-      final participantMap = await leaveRating(courseId, rating);
+      final participantMap = await _leaveRating(courseId, rating);
       final participant = participantMap.values.single;
       final course = _coursesMap[courseId]!;
 
@@ -193,7 +193,7 @@ class CourseProvider extends ChangeNotifier {
 
   Future<void> _updateParticipantAttendance(QrData data, String qrType) async {
     try {
-      final participantMap = await markAttendance(data, qrType);
+      final participantMap = await _markAttendance(data, qrType);
       final participant = participantMap.values.single;
       final course = _coursesMap[data.courseId]!;
 

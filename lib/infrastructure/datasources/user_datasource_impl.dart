@@ -9,9 +9,9 @@ typedef GetCourseCallback = Future<Course>Function(String courseId);
 
 class UserDatasourceImpl implements UserDatasource {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
-  final GetCourseCallback getCourse;
+  final GetCourseCallback _getCourse;
 
-  UserDatasourceImpl({required this.getCourse});
+  UserDatasourceImpl({required Future<Course> Function(String) getCourse}) : _getCourse = getCourse;
 
   @override
   Future<UserEntity> getUserById(String id) async {
@@ -40,7 +40,7 @@ class UserDatasourceImpl implements UserDatasource {
       final user = userDoc.data()!;
       final updatedUser = user.copyWith(courses: [...user.courses, courseId]);
 
-      final course = await getCourse(courseId);
+      final course = await _getCourse(courseId);
       if (isAdmin) {
         // Actualización de la lista de administradores del curso
         final administratorRef = _db.collection('courses').doc(courseId).collection('administrators').withConverter(
@@ -96,7 +96,7 @@ class UserDatasourceImpl implements UserDatasource {
       final paginatedIds = courseIds.sublist(offset, endIndex);
       
       for (final courseId in paginatedIds) {
-        final course = await getCourse(courseId);
+        final course = await _getCourse(courseId);
         courses.add(course);
       }
       return courses;
@@ -130,7 +130,7 @@ class UserDatasourceImpl implements UserDatasource {
   @override
   Future<Participant> registerAttendance(String userId, QrData data, String qrType) async {
     try {
-      final Course course = await getCourse(data.courseId);
+      final Course course = await _getCourse(data.courseId);
       final participantRef = _db.collection('courses').doc(data.courseId).collection('participants').withConverter(
         fromFirestore: (snapshot, _) => ParticipantFirebase.fromMap(snapshot.data()!),
         toFirestore: (model, _) => model.toMap(),
@@ -158,7 +158,7 @@ class UserDatasourceImpl implements UserDatasource {
   @override
   Future<Participant> registerRefreshment(QrData data, String qrType) async {
     try {
-      final Course course = await getCourse(data.courseId);
+      final Course course = await _getCourse(data.courseId);
       final participantRef = _db.collection('courses').doc(data.courseId).collection('participants').withConverter(
         fromFirestore: (snapshot, _) => ParticipantFirebase.fromMap(snapshot.data()!),
         toFirestore: (model, _) => model.toMap(),
