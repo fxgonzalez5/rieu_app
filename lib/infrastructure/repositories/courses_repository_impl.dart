@@ -12,6 +12,12 @@ class CoursesRepositoryImpl implements CoursesRepository {
     return datasource.getCourses(limit: limit, offset: offset, lastCourseId: lastCourseId);
   }
 
+    
+  @override
+  Future<List<String>> getCategories() {
+    return datasource.getCategories();
+  }
+
   @override
   Future<List<Course>> getCourseByCategory(String category, {int limit = 10, int offset = 0, String lastCourseId = ''}) {
     return datasource.getCourseByCategory(category, limit: limit, offset: offset, lastCourseId: lastCourseId);

@@ -6,7 +6,7 @@ class CoursesProvider extends ChangeNotifier {
   final CoursesRepository coursesRepository;
   final List<Course> userCourses;
   final TextEditingController searchController = TextEditingController();
-  final List<String> categories = ['Formación', 'Todo', 'Innovación', 'Encuentros Acad', 'Café Científico', 'Diálogos Éticos', 'Congresos', 'Otros'];
+  final List<String> categories = ['Todo'];
   final List<Course> courses = [], _backupCourses = [], _backupUserCourses = [];
   final int limit = 5;
   String _currentCategory = 'Todo', _lastCourseId = '';
@@ -14,6 +14,7 @@ class CoursesProvider extends ChangeNotifier {
 
   CoursesProvider({required this.coursesRepository, required this.userCourses}) {
     loadNextPage();
+    loadCategories();
   }
 
   String get currentCategory => _currentCategory;
@@ -68,6 +69,13 @@ class CoursesProvider extends ChangeNotifier {
     if (newCourses.isNotEmpty) _lastCourseId = newCourses.last.id;
 
     isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> loadCategories() async {
+    final newCategories = await coursesRepository.getCategories();
+    newCategories.sort((a, b) => a.compareTo(b));
+    categories.addAll(newCategories);
     notifyListeners();
   }
 

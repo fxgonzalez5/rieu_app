@@ -112,6 +112,22 @@ class FirebaseDataSource implements CoursesDatasource {
     }
   }
 
+    
+  @override
+  Future<List<String>> getCategories() async {
+    try {
+      final coursesFirebase = await _db.collection('courses').get();
+
+      final categories = coursesFirebase.docs
+        .map((doc) => doc.data()['type'] as String)
+        .toSet()
+        .toList();
+      return categories;
+    } catch (e) {
+      throw Exception('Error al obtener las categorías: $e');
+    }
+  }
+
   @override
   Future<List<Course>> getCourseByCategory(String category, {int limit = 10, int offset = 0, String lastCourseId = ''}) async {
     try {
