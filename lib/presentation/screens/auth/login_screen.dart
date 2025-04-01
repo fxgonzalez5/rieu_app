@@ -134,15 +134,15 @@ class _LoginMethods extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        buildInkWell(
-          responsive: responsive,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(responsive.ip(0.5)),
-            child: Image.asset('assets/images/logo_utpl.png', width: responsive.ip(6)),
-          ),
-          onTap: () {}, // TODO: Implementar inicio de sesión con Microsoft
-        ),
-        SizedBox(width: responsive.wp(10)),
+        // buildInkWell(
+        //   responsive: responsive,
+        //   child: ClipRRect(
+        //     borderRadius: BorderRadius.circular(responsive.ip(0.5)),
+        //     child: Image.asset('assets/images/logo_utpl.png', width: responsive.ip(6)),
+        //   ),
+        //   onTap: () {}, // TODO: Implementar inicio de sesión con Microsoft
+        // ),
+        // SizedBox(width: responsive.wp(10)),
         buildInkWell(
           responsive: responsive,
           child: Image.asset('assets/images/logo_google.png', width: responsive.ip(6)),

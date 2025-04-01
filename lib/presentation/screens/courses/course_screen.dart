@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:readmore/readmore.dart';
 import 'package:rieu/config/helpers/helpers.dart';
 import 'package:rieu/config/theme/responsive.dart';
 import 'package:rieu/domain/entities/entities.dart';
@@ -92,6 +93,7 @@ class _CourseBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
+    final colors = Theme.of(context).colorScheme;
     final texts = Theme.of(context).textTheme;
     final user = context.watch<UserProvider>().user;
     final courseStatus = context.watch<CourseProvider>().coursesStatusMap[course.id]!;
@@ -108,7 +110,17 @@ class _CourseBody extends StatelessWidget {
                 padding: EdgeInsets.only(top: responsive.hp(2), bottom: responsive.hp(1)),
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: Text(course.name, style: texts.headlineSmall, textAlign: TextAlign.justify)
+                  child: ReadMoreText(
+                    course.name,
+                    trimMode: TrimMode.Line,
+                    trimLines: 3,
+                    trimCollapsedText: ' Leer más',
+                    trimExpandedText: ' Leer menos',
+                    moreStyle: texts.titleSmall!.copyWith(color: colors.primary),
+                    lessStyle: texts.titleSmall!.copyWith(color: colors.primary),
+                    style: TextStyle(fontSize: responsive.ip(2.6)),
+                    textAlign: TextAlign.justify,
+                  ),
                 ),
               ),
               Container(
