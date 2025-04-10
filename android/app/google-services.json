@@ -7,17 +7,25 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:752767528985:android:8905e9f8b572f26d28fa88",
+        "mobilesdk_app_id": "1:752767528985:android:eecfc5a909160cd128fa88",
         "android_client_info": {
-          "package_name": "com.utpl.rieu"
+          "package_name": "ec.edu.utpl.ascendere"
         }
       },
       "oauth_client": [
         {
-          "client_id": "752767528985-d9l186mufrqj8ekgckhdtju5rohua0ui.apps.googleusercontent.com",
+          "client_id": "752767528985-cl0rffm3fu231jr7o3420ducq8h0v5h8.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.utpl.rieu",
+            "package_name": "ec.edu.utpl.ascendere",
+            "certificate_hash": "704b021942b65afed0369ab2caf4e626a0a68b13"
+          }
+        },
+        {
+          "client_id": "752767528985-qmo3m3i7nreq37hthkkv0cjlfdtph7l5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "ec.edu.utpl.ascendere",
             "certificate_hash": "ae66176345597fcd4ab6837e8dbdd87e4c89ecc6"
           }
         },
@@ -39,10 +47,10 @@
               "client_type": 3
             },
             {
-              "client_id": "752767528985-7dkaj9li1v6fh1c6mu32u2p33scprvo0.apps.googleusercontent.com",
+              "client_id": "752767528985-450689rd6osukbbp5ijr64hur57r1mu5.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.utpl.rieu"
+                "bundle_id": "ec.edu.utpl.ascendere"
               }
             }
           ]
