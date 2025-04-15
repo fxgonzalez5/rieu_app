@@ -4,13 +4,13 @@ flutter_native_splash:
   ios: true
   web: false
 
-  color: "#42a5f5"
+  color: "#003F72"
   #background_image: "assets/background.png"
-  #image: assets/logo.png
-  #branding: assets/dart.png
+  image: assets/app/app_icon_ascendere_splash.png
+  branding: assets/app/app_branding_liid_splash.png
 
   android_12:
-    #image: assets/android12splash.png
-    #color: "#42a5f5"
+    color: "#003F72"
+    image: assets/app/app_icon_ascendere_splash_12.png
     #icon_background_color: "#111111"
-    #branding: assets/dart.png
+    branding: assets/app/app_branding_liid_splash.png
