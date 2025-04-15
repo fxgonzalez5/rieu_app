@@ -1,0 +1,16 @@
+# Sitio web: https://pub.dev/packages/flutter_native_splash
+flutter_native_splash:
+  android: true
+  ios: true
+  web: false
+
+  color: "#42a5f5"
+  #background_image: "assets/background.png"
+  #image: assets/logo.png
+  #branding: assets/dart.png
+
+  android_12:
+    #image: assets/android12splash.png
+    #color: "#42a5f5"
+    #icon_background_color: "#111111"
+    #branding: assets/dart.png

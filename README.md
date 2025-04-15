@@ -40,3 +40,15 @@ await Firebase.initializeApp(
 ```bash
 dart run change_app_package_name:main ec.edu.utpl.ascendere
 ```
+2. Cambiar el icono de la aplicación (modificar el archivo `flutter_launcher_icons.yaml`) ⬇️
+```bash
+flutter pub get
+dart run flutter_launcher_icons
+```
+3. Modificar la pantalla de inicio de la aplicación (modificar el archivo `flutter_native_splash.yaml`) ⬇️
+```bash
+dart run flutter_native_splash:create --path=flutter_native_splash.yaml
+
+# Si se desea eliminar los cambios relizados al modificar el archivo
+dart run flutter_native_splash:remove
+```
